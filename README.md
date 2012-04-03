@@ -43,50 +43,28 @@ Any other regexp pattern will work also
 
 ## Example
 
-`
-< ? php
-
+```php
+<?php
 include("./Paginator.php");
 
+$queryUrl = "http://www.givemebeats.net/buy-beats/Hip-Hop-Rap/page/4/";
+$pagePattern = "/page/(:num)";
+$Paginator = new Paginator($queryUrl,$pagePattern);
+$Paginator
+    ->setTotalItems(225) 
+    ->setItemsPerPage(10)
+    ->setNavigationSize(10);
 
- $queryUrl = "http://www.givemebeats.net/buy-beats/Hip-Hop-Rap/page/4/";
- 
- $pagePattern = "/page/(:num)";
- 
- $Paginator = new Paginator($queryUrl,$pagePattern);
- 
- $Paginator
-		   ->setTotalItems(225) 
-
-           ->setItemsPerPage(10)
-
-           ->setNavigationSize(10);
-
- 
- 
- /**
-  * Use the getSQLOffset() to create a SQL offset limit 
-  */
-
- $SQLOffset = $Paginator->getSQLOffset();
-
- $SQL = "
-
-     SELECT 
-            *
-     FROM
-            my_table
-     WHERE
-            X=Y
-     LIMIT
-           {$SQLOffset}
-";
+//Use the getSQLOffset() to create a SQL offset limit 
+$SQLOffset = $Paginator->getSQLOffset();
+$SQL = "SELECT * FROM my_table WHERE X=Y LIMIT {$SQLOffset}";
          
 $Pagination = $Paginator->render();
 
 print($Pagination);
 
-`
+```
+
 [1] [2] [3] [4] [5]  [Next]
 ---
 
