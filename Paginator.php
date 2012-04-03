@@ -20,14 +20,14 @@
  * ABOUT
  * -----
  * Paginator is a simple class that allows you to create pagination for your application.
- * When rendered it will display the pagination properly and uses the CSS class .pagination which is based on Twitter's Bootstrap framework.
+ * It doesn't require any database connection. It is compatible with Twitter's Bootstrap Framework, by using the CSS class pagination.
  * So it can be implemented quickly in your existing settings.
  * 
  * 
  * How it works
  * -----------
- * It read the $queryUrl that was provided and based on the $pagePattern it extract the page number 
- * and build the pagination for all the page number.
+ * It reads the $queryUrl ( http://xyz.x/page/253 ) that was provided and based on the regexp pattern (ie: /page/(:num)) 
+ * it extract the page number and build the pagination for all the page numbers.
  * 
  * About $pagePattern (:num)
  * -----------
