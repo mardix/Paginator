@@ -14,7 +14,7 @@
  * @name        Paginator
  * @since       Apr 3, 2012
  * @desc        A simple pagination class.
- * @version     1.0
+ * @version     1.1
  * 
  * 
  * ABOUT
@@ -27,7 +27,7 @@
  * How it works
  * -----------
  * It reads the $queryUrl ( http://xyz.x/page/253 ) that was provided and based on the regexp pattern (ie: /page/(:num)) 
- * it extract the page number and build the pagination for all the page numbers.
+ * it extract the page number and build the pagination for all the page numbers. If the page number does't exist, i will create for you based on the pattern
  * 
  * About $pagePattern (:num)
  * -----------
@@ -71,6 +71,9 @@
 
 class Paginator {
    
+    const Name = "Paginator";
+    const Version = "1.1";
+    
     /**
      * Holds params 
      * @var array 
@@ -132,6 +135,61 @@ class Paginator {
         $pattern = str_replace("(:num)","([0-9]+)",$pagePattern);
        
         preg_match("~$pattern~i",$url,$m);
+        
+        
+        /**
+         * No match found. 
+         * We'll add the pagination in the url, so this way it can be ready for next pages
+         */
+        if(count($m) == 0){
+          
+          $pag_ = str_replace("(:num)",0,$pagePattern);
+
+          /**
+           * page pattern contain the equal sign, we'll add it to the query ?page=123 
+           */
+          if(strpos($pagePattern,"=") !== false){
+
+              if(strpos($url,"?") !== false)
+                      $url .= "&".$pag_;
+              else
+                  $url .= "?".$pag_;
+              
+            return
+                $this->setQueryUrl($url,$pagePattern);
+          } 
+          
+          /**
+           * Friendly url : /page/123
+           */
+          else if(strpos($pagePattern,"/") !== false){
+              
+              if(strpos($url,"?") !== false){
+                  list($segment,$query) = explode("?",$url,2);
+                  
+                    if(preg_match("/\/$/",$segment)){
+                        $url = $segment.(preg_replace("/^\//","",$pag_));
+                        $url .= ((preg_match("/\/$/",$pag_)) ? "" : "/"). "?{$query}";
+                    }
+                        
+                    else{
+                        $url = $segment.$pag_;
+                        $url .= ((preg_match("/\/$/",$pag_)) ? "" : "/"). "?{$query}";
+                    }
+              }
+                      
+              else{
+                    if(preg_match("/\/$/",$segment))
+                        $url .= (preg_replace("/^\//","",$pag_));
+                    else
+                        $url .= $pag_;                  
+              }
+                    
+            return
+                $this->setQueryUrl($url,$pagePattern);
+          }
+        }        
+        
         
         $match = current($m);
         $last = end($m);
