@@ -14,7 +14,7 @@
  * @name        Paginator
  * @since       Apr 3, 2012
  * @desc        A simple pagination class.
- * @version     1.1
+ * @version     1.1.1
  * 
  * 
  * ABOUT
@@ -39,6 +39,16 @@
  *  page=(:num) , will capture the pattern http://xyz.com/?page=252
  *  
  *  Any other regexp pattern will work also
+ * 
+ * When a query url is set without the page number, automatically based on the page pattern, the page number will be added
+ * i.e: 
+ *     $queryUrl = http://xyz.com/?q=boom
+ *     $pagePattern = page=(:num)
+ * 
+ *     the page number will be added as so at the end of the query
+ *     http://xyz.com/?q=boom&page=2 
+ * 
+ * 
  * 
  * Example
  * With friendly url:
@@ -65,14 +75,13 @@
  * ---------
  *      Paginator::CreateWithUri($pagePattern,$totalItems);
  * 
- *
  */
 
 
 class Paginator {
    
     const Name = "Paginator";
-    const Version = "1.1";
+    const Version = "1.1.1";
     
     /**
      * Holds params 
@@ -139,7 +148,8 @@ class Paginator {
         
         /**
          * No match found. 
-         * We'll add the pagination in the url, so this way it can be ready for next pages
+         * We'll add the pagination in the url, so this way it can be ready for next pages.
+         * This way a url http://xyz.com/?q=boom , becomes http://xyz.com/?q=boom&page=2
          */
         if(count($m) == 0){
           
@@ -216,7 +226,6 @@ class Paginator {
     public function setPrevNextTitle($prev = "Prev",$next = "Next"){
         $this->params["prevTitle"] = $prev;
         $this->params["nextTitle"] = $next;
-        
         return
             $this;
     }
@@ -326,9 +335,7 @@ class Paginator {
      * @return Paginator 
      */
     public function setNavigationSize($set = 10){
-        
         $this->params["navSize"] = $set;
-        
         return
             $this;
     }
@@ -350,6 +357,13 @@ class Paginator {
      * @param string $wrapTag
      * @param string $listTag
      * @return string
+     * <div class='pagination'>
+     *      <ul>
+     *          <li>1</li>
+     *          <li class='active'>2</li>
+     *          <li>3</li>
+     *      <ul>
+     * </div>
      */
     public function render($totalItems = 0,$paginationClsName="pagination",$wrapTag = "ul",$listTag = "li"){
         
@@ -448,7 +462,7 @@ class Paginator {
             $html = "<a>{$html}</a>";
             
         return
-            "<{$this->listTag} class=\"$activeCls $disableCls\">$html</{$this->listTag}>\n";
+            "<{$this->listTag} class=\"{$activeCls} {$disableCls}\">{$html}</{$this->listTag}>\n";
     }
     
     
