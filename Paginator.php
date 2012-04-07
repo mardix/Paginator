@@ -14,7 +14,7 @@
  * @name        Paginator
  * @since       Apr 3, 2012
  * @desc        A simple pagination class.
- * @version     1.2 (Apr 7 2012)
+ * @version     1.2.1 (Apr 7 2012)
  * 
  * 
  * ABOUT
@@ -91,7 +91,7 @@
  * 
  * - setPrevNextTitle(Prev,Next)          : To set the action next and previous
  * 
- * - toArray($totalItems)                 : Return the pagination in array. Use it if you want to use your own template to generate the pagination in HTML or other format
+ * - toArray($totalItems)                 : Return the pagination in array. Use it if you want to use your own template to generate the pagination in HTML
  * 
  * - render($totalItems)                  : Return the pagination in HTML format
  * 
@@ -117,7 +117,7 @@
 class Paginator {
    
     const Name = "Paginator";
-    const Version = "1.2";
+    const Version = "1.2.1";
     
     /**
      * Holds params 
@@ -427,8 +427,8 @@ class Paginator {
             }
 
             // Previous   
-            $prev = $start -1;
-            if($prev > 0){
+            $prev = $currentPage - 1;
+            if($currentPage+1 > $navSize){
                 $Navigation[] = array(
                     "PageNumber"=>$prev,
                     "Label"=>$this->prevTitle,
@@ -450,12 +450,12 @@ class Paginator {
                 
 
             // Next 
-            $next = $end;                          
+            $next = $currentPage + 1;                          
             if($next < $totalPages) {
                 $Navigation[] = array(
-                    "PageNumber"=>$next+1,
+                    "PageNumber"=>$next,
                     "Label"=>$this->nextTitle,
-                    "Url"=>$this->parseTplUrl($next+1),
+                    "Url"=>$this->parseTplUrl($next),
                     "isCurrent"=>false
                 );  
             }
