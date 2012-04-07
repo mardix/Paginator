@@ -14,7 +14,7 @@
  * @name        Paginator
  * @since       Apr 3, 2012
  * @desc        A simple pagination class.
- * @version     1.1.1
+ * @version     1.2 (Apr 7 2012)
  * 
  * 
  * ABOUT
@@ -75,13 +75,49 @@
  * ---------
  *      Paginator::CreateWithUri($pagePattern,$totalItems);
  * 
+ * 
+ * Major Methods
+ * -----------------
+ * 
+ * - __construct()                        : Instantiate the class
+ * 
+ * - setQueryUrl($queryUrl,$pagePattern)  : To set the url that will be used to create the pagination. pagePattern is a regex to catch the page number in the queryUrl
+ * 
+ * - setTotalItems($totalItems)           : Set the total items. It is required so it create the proper page count etc
+ * 
+ * - setItemsPerPage($ipp)                : Total items to display in your results page. This count will allow it to properly count pages
+ * 
+ * - setNavigationSize($nav)              : Crete the size of the pagination like [1][2][3][4][next]
+ * 
+ * - setPrevNextTitle(Prev,Next)          : To set the action next and previous
+ * 
+ * - toArray($totalItems)                 : Return the pagination in array. Use it if you want to use your own template to generate the pagination in HTML or other format
+ * 
+ * - render($totalItems)                  : Return the pagination in HTML format
+ * 
+ * 
+ * 
+ * Other methods to access and update data before rendering
+ * 
+ * - getCurrentPage()                   : Return the current page number
+ * 
+ * - getTotalPages()                    : Return the total pages
+ * 
+ * - getStartCount()                    : The start count. 
+ * 
+ * - getEndCount()                      : The end count 
+ * 
+ * - getSQLOffest()                     : When using SQL query, you can use this method to give you the limit count like: 119,10 which will be used in "LIMIT 119,10"
+ * 
+ * - getItemsPerPage()                  : Return the total items per page
+ * 
+ * 
  */
-
 
 class Paginator {
    
     const Name = "Paginator";
-    const Version = "1.1.1";
+    const Version = "1.2";
     
     /**
      * Holds params 
@@ -349,9 +385,92 @@ class Paginator {
             $this->params["navSize"];
     }
 /*******************************************************************************/
-// RENDER
+    
     /**
-     * Render the paginator
+     * toArray() export the pagination into an array. This array can be used for your own template or for other usafe
+     * @param int $totalItems - the total Items found
+     * @return Array 
+     *     Array(
+     *          array(
+     *                "PageNumber", // the page number
+     *                "Label", // the label for the page number
+     *                "Url", // the url 
+     *                "isCurrent" // bool  set if page is current or not
+     *          )
+     *      )
+     */
+    public function toArray($totalItems = 0){
+        
+        $Navigation = array();
+        
+        if($totalItems)
+            $this->setTotalItems($totalItems);
+        
+        $totalPages = $this->getTotalPages();
+        $navSize = $this->getNavigationSize();
+        $currentPage = $this->getCurrentPage();
+
+        if($totalPages){
+            
+            $halfSet = @ceil($navSize/2);
+            $start = 1;
+            $end = ($totalPages<$navSize) ? $totalPages : $navSize;
+            
+            if($currentPage >= $navSize){
+               $start = $currentPage - $navSize + $halfSet +1;
+               $end = $currentPage + $halfSet -1;
+            }
+            
+            if($end > $totalPages){
+                $start = $totalPages - $navSize;
+                $end = $totalPages;
+            }
+
+            // Previous   
+            $prev = $start -1;
+            if($prev > 0){
+                $Navigation[] = array(
+                    "PageNumber"=>$prev,
+                    "Label"=>$this->prevTitle,
+                    "Url"=>$this->parseTplUrl($prev),
+                    "isCurrent"=>false
+                );   
+            }
+                                                
+
+            // All the pages
+            for($i=$start; $i<=$end; $i++){
+                $Navigation[] = array(
+                    "PageNumber"=>$i,
+                    "Label"=>$i,
+                    "Url"=>$this->parseTplUrl($i),
+                    "isCurrent"=>($i == $currentPage) ? true : false,
+                );                
+            }
+                
+
+            // Next 
+            $next = $end;                          
+            if($next < $totalPages) {
+                $Navigation[] = array(
+                    "PageNumber"=>$next+1,
+                    "Label"=>$this->nextTitle,
+                    "Url"=>$this->parseTplUrl($next+1),
+                    "isCurrent"=>false
+                );  
+            }
+
+
+        }
+        
+        return
+            $Navigation;
+        
+    }
+    
+
+    /**
+     * Render the paginator in HTML format
      * @param int $totalItems - The total Items
      * @param string $paginationClsName - The class name of the pagination
      * @param string $wrapTag
@@ -370,58 +489,16 @@ class Paginator {
         $this->listTag = $listTag;
         
         $this->wrapTag = $wrapTag;
-        
-        $Pages = "";
-        
-        if($totalItems)
-            $this->setTotalItems($totalItems);
-        
-        $totalPages = $this->getTotalPages();
-        $navSize = $this->getNavigationSize();
-        $currentPage = $this->getCurrentPage();
-        
-        if($totalPages){
-            
-            $halfSet = @ceil($navSize/2);
-            $start = 1;
-            $end = ($totalPages<$navSize) ? $totalPages : $navSize;
-            
-            if($currentPage >= $navSize){
-               $start = $currentPage - $navSize + $halfSet +1;
-               $end = $currentPage + $halfSet -1;
-            }
-            
-            if($end > $totalPages){
-                $start = $totalPages - $navSize;
-                $end = $totalPages;
-            }
-            
-            $next = $end;
-            $prev = $start -1;
-            
 
-            $NextButton = ($next < $totalPages) 
-                                        ? $this->wrapList($this->makeLink($next+1,$this->nextTitle)) 
-                                        : (
-                                           ($next >= $totalPages) ? "" : $this->wrapList($this->nextTitle,false,true)
-                                          );
-
-            $PrevButton = ($prev > 0) 
-                                ? $this->wrapList($this->makeLink($prev,$this->prevTitle)) 
-                                : (
-                                   ($currentPage <= $navSize) ? "" : $this->wrapList($this->prevTitle,false,true)
-                                  );
-            
-            for($i=$start; $i<$end+1; $i++)
-                $Pages .= ($i == $currentPage) ? $this->wrapList($i,true,false): $this->wrapList($this->makeLink($i,$i));         
-            
-            
-            return 
-                "<div class=\"{$paginationClsName}\">
-                    <{$this->wrapTag}>$PrevButton $Pages $NextButton</{$this->wrapTag}>
-                 </div>";
+        foreach($this->toArray($totalItems) as $page){
+            $pagination .= $this->wrapList($this->aHref($page["Url"],$page["Label"]),$page["isCurrent"],false);
         }
-
+        
+        return 
+            "<div class=\"{$paginationClsName}\">
+                <{$this->wrapTag}>{$pagination}</{$this->wrapTag}>
+            </div>";
+                    
     }     
     
 /*******************************************************************************/
@@ -437,18 +514,18 @@ class Paginator {
     }
     
     /**
-     * To create an <a> link
+     * To create an <a href> link
      * @param int $pageNumber
      * @param string $txt
      * @return string 
      */
-    protected function makeLink($pageNumber,$txt){
+    protected function aHref($url,$txt){
         return
-            "<a href=\"".$this->parseTplUrl($pageNumber)."\">{$txt}</a>";
+            "<a href=\"{$url}\">{$txt}</a>";
     }
 
     /**
-     * Create a wrap list, <li></li>
+     * Create a wrap list, ie: <li></li>
      * @param string $html
      * @param bool $isActive - To set the active class in this element
      * @param bool $isDisabled - To set the disabled class in this element
@@ -458,8 +535,6 @@ class Paginator {
         $activeCls = $isActive ? " active " : "";
         $disableCls = $isDisabled ? " disabled " : "";
         
-        if($isActive)
-            $html = "<a>{$html}</a>";
             
         return
             "<{$this->listTag} class=\"{$activeCls} {$disableCls}\">{$html}</{$this->listTag}>\n";
@@ -480,9 +555,8 @@ class Paginator {
     
     public function __toString() {
         return
-            $this->render($this->getTotalItems());
+            $this->render();
     }    
     
     
 }
-
