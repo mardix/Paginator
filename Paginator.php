@@ -14,7 +14,7 @@
  * @name        Paginator
  * @since       Apr 3, 2012
  * @desc        A simple pagination class.
- * @version     1.2.1 (Apr 7 2012)
+ * @version     1.2.2 (Apr 7 2012)
  * 
  * 
  * ABOUT
@@ -117,7 +117,7 @@
 class Paginator {
    
     const Name = "Paginator";
-    const Version = "1.2.1";
+    const Version = "1.2.2";
     
     /**
      * Holds params 
@@ -322,8 +322,10 @@ class Paginator {
      * @return type 
      */
     public function getCurrentPage(){
-        return
-            $this->params["currentPage"];
+       return
+            ($this->params["currentPage"] <= $this->getTotalPages()) 
+                ? $this->params["currentPage"] 
+                : $this->getTotalPages();
     }
     
     /**
@@ -416,27 +418,29 @@ class Paginator {
             $start = 1;
             $end = ($totalPages<$navSize) ? $totalPages : $navSize;
             
+            $usePrevNextNav = ($totalPages > $navSize) ? true : false;
+            
             if($currentPage >= $navSize){
                $start = $currentPage - $navSize + $halfSet +1;
                $end = $currentPage + $halfSet -1;
             }
-            
+               
             if($end > $totalPages){
-                $start = $totalPages - $navSize;
-                $end = $totalPages;
+                $s = $totalPages - $navSize;
+                $start = $s ? $s : 1;
+                $end = $totalPages;  
             }
 
             // Previous   
             $prev = $currentPage - 1;
-            if($currentPage+1 > $navSize){
+            if($currentPage >= $navSize && $usePrevNextNav){
                 $Navigation[] = array(
                     "PageNumber"=>$prev,
                     "Label"=>$this->prevTitle,
                     "Url"=>$this->parseTplUrl($prev),
                     "isCurrent"=>false
                 );   
-            }
-                                                
+            }                          
 
             // All the pages
             for($i=$start; $i<=$end; $i++){
@@ -448,10 +452,9 @@ class Paginator {
                 );                
             }
                 
-
             // Next 
             $next = $currentPage + 1;                          
-            if($next < $totalPages) {
+            if($next < $totalPages && $end<$totalPages && $usePrevNextNav ) {
                 $Navigation[] = array(
                     "PageNumber"=>$next,
                     "Label"=>$this->nextTitle,
