@@ -43,19 +43,19 @@ Any other regexp pattern will work also
 ### Public Methods
 
   
-***setQueryUrl**($queryUrl,$pagePattern)*  : To set the url that will be used to create the pagination. $pagePattern is a regex to catch the page number in the queryUrl
+**setQueryUrl**($queryUrl,$pagePattern)  : To set the url that will be used to create the pagination. $pagePattern is a regex to catch the page number in the queryUrl
   
-***setTotalItems**($totalItems)*         : Set the total items. It is required so it create the proper page count etc
+**setTotalItems**($totalItems)         : Set the total items. It is required so it create the proper page count etc
   
-***setItemsPerPage**($ipp)*                : Total items to display in your results page. This count will allow it to properly count pages
+**setItemsPerPage**($ipp)                : Total items to display in your results page. This count will allow it to properly count pages
   
-***setNavigationSize**($nav)*              : Crete the size of the pagination like [1][2][3][4][next]
+**setNavigationSize**($nav)              : Crete the size of the pagination like [1][2][3][4][next]
   
-***setPrevNextTitle**(Prev,Next)*         : To set the action next and previous
+**setPrevNextTitle**(Prev,Next)         : To set the action next and previous
 
-***toArray**($totalItems)*                 : Return the pagination in array. Use it if you want to use your own template to generate the pagination in HTML
+**toArray**($totalItems)                 : Return the pagination in array. Use it if you want to use your own template to generate the pagination in HTML
   
-***render**($totalItems)*                  : Return the pagination in HTML format
+**render**($totalItems)                  : Return the pagination in HTML format
 
 
 ### Getters
