@@ -39,10 +39,16 @@ It reads the $queryUrl ( http://xyz.x/page/253 ) that was provided and based on 
 Any other regexp pattern will work also
 
 ---
-
 ### Public Methods
 
+
+**render**($totalItems)                  : Return the pagination in HTML format
+
+**toArray**($totalItems)                 : Return the pagination in array. Use it if you want to use your own template to generate the pagination in HTML
   
+
+#### Setters
+
 **setQueryUrl**($queryUrl,$pagePattern)  : To set the url that will be used to create the pagination. $pagePattern is a regex to catch the page number in the queryUrl
   
 **setTotalItems**($totalItems)         : Set the total items. It is required so it create the proper page count etc
@@ -53,13 +59,8 @@ Any other regexp pattern will work also
   
 **setPrevNextTitle**(Prev,Next)         : To set the action next and previous
 
-**toArray**($totalItems)                 : Return the pagination in array. Use it if you want to use your own template to generate the pagination in HTML
-  
-**render**($totalItems)                  : Return the pagination in HTML format
 
-
-### Getters
-Other methods to access and update data before rendering
+#### Getters
 
 ***getCurrentPage()***                  : Return the current page number
 
