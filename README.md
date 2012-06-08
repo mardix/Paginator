@@ -14,12 +14,12 @@ So it can be implemented quickly in your existing settings.
 
 
 #### And who created it?
-Me. Mardix. You can follow me  [@mardix](http://twitter.com/mardix), or check out my github: [mardix.github.com](http://mardix.github.com/) to check out some of my other code that you may want to fork.
+Me. Mardix. You can follow me  [@mardix](http://twitter.com/mardix), or check out my github: [github.com/mardix](https://github.com/mardix) to check out some of my other library that you may want to fork.
 
 So Holla!
 
 
-
+---
 
 ### How it works?
 
@@ -27,17 +27,52 @@ It reads the $queryUrl ( http://xyz.x/page/253 ) that was provided and based on 
 
 
 
+### About the regexp pattern: **(:num)**
 
-### About the regexp pattern: **** (:num)****
 
-
-*** (:num)*** is our regex pattern to capture the page number and pass it to generate the pagination. It is require to catch the page number properly
+***(:num)*** is our regex pattern to capture the page number and pass it to generate the pagination. It is require to catch the page number properly
  
 **/page/(:num)** : will capture page in this pattern http://xyz.com/page/252
  
 **page=(:num)** : will capture the pattern http://xyz.com/?page=252
 
 Any other regexp pattern will work also
+
+---
+
+### Public Methods
+
+  
+***setQueryUrl**($queryUrl,$pagePattern)*  : To set the url that will be used to create the pagination. $pagePattern is a regex to catch the page number in the queryUrl
+  
+***setTotalItems**($totalItems)*         : Set the total items. It is required so it create the proper page count etc
+  
+***setItemsPerPage**($ipp)*                : Total items to display in your results page. This count will allow it to properly count pages
+  
+***setNavigationSize**($nav)*              : Crete the size of the pagination like [1][2][3][4][next]
+  
+***setPrevNextTitle**(Prev,Next)*         : To set the action next and previous
+
+***toArray**($totalItems)*                 : Return the pagination in array. Use it if you want to use your own template to generate the pagination in HTML
+  
+***render**($totalItems)*                  : Return the pagination in HTML format
+
+
+### Getters
+Other methods to access and update data before rendering
+
+***getCurrentPage()***                  : Return the current page number
+
+***getTotalPages()***                   : Return the total pages
+
+***getStartCount()***                   : Return the start count. 
+
+***getEndCount()***                      : Return the end count 
+
+***getSQLOffest()***                     : When using SQL query, you can use this method to give you the limit count like: 119,10 which will be used in "LIMIT 119,10"
+
+***getItemsPerPage()***                  : Return the total items per page
+
 
 ---
 
