@@ -81,11 +81,11 @@ Any other regexp pattern will work also
 
 ```php
 <?php
-include("./Paginator.php");
+include(dirname(__DIR__)."/src/Voodoo/Paginator.php");
 
 $queryUrl = "http://www.givemebeats.net/buy-beats/Hip-Hop-Rap/page/4/";
 $pagePattern = "/page/(:num)";
-$Paginator = new Paginator($queryUrl,$pagePattern);
+$Paginator = new Voodoo\Paginator($queryUrl,$pagePattern);
 $Paginator
     ->setTotalItems(225) 
     ->setItemsPerPage(10)
