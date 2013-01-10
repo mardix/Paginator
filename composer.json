@@ -1,5 +1,5 @@
 {
-    "name": "soup/paginator",
+    "name": "voodoophp/paginator",
     "type": "library",
     "description": "Paginator is a simple class that allows you to create pagination. It doesn't require any database connection. It is compatible with Twitter's Bootstrap Framework, by using the CSS class pagination that is also attached.",
     "keywords": ["pagination"],
@@ -8,11 +8,14 @@
     "authors": [
         {
             "name": "Mardix",
-            "homepage": "http://mardix.tumblr.com",
+            "homepage": "http://github.com/mardix",
             "role": "Developer"
         }
     ],
     "require": {
         "php": ">=5.3.0"
-    }
+    },
+    "autoload": {
+        "psr-0": { "Voodoo": "src/" }
+    }          
 }
