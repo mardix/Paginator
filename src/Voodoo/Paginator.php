@@ -114,8 +114,8 @@ namespace Voodoo;
 
 class Paginator {
    
-    const Name = "Paginator";
-    const Version = "1.2.3";
+    const NAME = "Paginator";
+    const VERSION = "1.2.3";
     
     /**
      * Holds params 
