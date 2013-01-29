@@ -465,6 +465,7 @@ class Paginator {
     {
         $this->listTag = $listTag;
         $this->wrapTag = $wrapTag;
+        $pagination = "";
         foreach ($this->toArray($totalItems) as $page) {
             $pagination .= $this->wrapList($this->aHref($page["Url"],$page["Label"]),$page["isCurrent"],false);
         }
