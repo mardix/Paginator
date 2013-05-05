@@ -4,10 +4,10 @@
  * Paginator
  * -----------------------------------------------------------------------------
  * @author      Mardix (http://twitter.com/mardix)
- * @github      https://github.com/mardix/VoodOrm
+ * @github      https://github.com/mardix/Paginator
  * @package     VoodooPHP (https://github.com/VoodooPHP/Voodoo/)
  *
- * @copyright   (c) 2012 Mardix (http://github.com/mardix)
+ * @copyright   (c) 2012-2013 Mardix (http://github.com/mardix)
  * @license     MIT
  * -----------------------------------------------------------------------------
  * 
@@ -76,19 +76,12 @@
  * -----------------
  * 
  * - __construct()                        : Instantiate the class
- * 
  * - setQueryUrl($queryUrl,$pagePattern)  : To set the url that will be used to create the pagination. pagePattern is a regex to catch the page number in the queryUrl
- * 
  * - setTotalItems($totalItems)           : Set the total items. It is required so it create the proper page count etc
- * 
  * - setItemsPerPage($ipp)                : Total items to display in your results page. This count will allow it to properly count pages
- * 
  * - setNavigationSize($nav)              : Crete the size of the pagination like [1][2][3][4][next]
- * 
  * - setPrevNextTitle(Prev,Next)          : To set the action next and previous
- * 
  * - toArray($totalItems)                 : Return the pagination in array. Use it if you want to use your own template to generate the pagination in HTML
- * 
  * - render($totalItems)                  : Return the pagination in HTML format
  * 
  * 
@@ -96,17 +89,14 @@
  * Other methods to access and update data before rendering
  * 
  * - getCurrentPage()                   : Return the current page number
- * 
  * - getTotalPages()                    : Return the total pages
- * 
  * - getStartCount()                    : The start count. 
- * 
  * - getEndCount()                      : The end count 
- * 
  * - getSQLOffest()                     : When using SQL query, you can use this method to give you the limit count like: 119,10 which will be used in "LIMIT 119,10"
- * 
  * - getItemsPerPage()                  : Return the total items per page
- * 
+ * - getCurrentPageUrl()                : Return the full url of the current page including the page number
+ * - getPreviousPageUrl()               : Return the full url of the previous page including the page number
+ * - getNextPageUrl()                   : Return the full url of the next page including the page number
  * 
  */
 
@@ -115,7 +105,7 @@ namespace Voodoo;
 class Paginator {
    
     const NAME = "Paginator";
-    const VERSION = "1.0.4";
+    const VERSION = "1.1";
     
     /**
      * Holds params 
@@ -139,9 +129,10 @@ class Paginator {
      * @param int $navigationSize - The naviagation set size
      * @return Paginator
      */
-    public static function CreateWithUri($pagePattern="/page/(:num)",$totalItems = 0,$itemPerPage = 10,$navigationSize = 10)
+    public static function CreateWithUri($pagePattern="/page/(:num)", $totalItems = 0, $itemPerPage = 10, $navigationSize = 10)
     {
-        return new self($_SERVER["REQUEST_URI"],$pagePattern,$totalItems,$itemPerPage,$navigationSize);
+        $uri =  $_SERVER["REQUEST_SCHEME"]."://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"];
+        return new self($uri, $pagePattern, $totalItems, $itemPerPage, $navigationSize);
     }
     
     
@@ -155,7 +146,7 @@ class Paginator {
      * @param int $itemPerPage - Total items per page
      * @param int $navigationSize - The naviagation set size
      */
-    public function __construct($queryUrl="",$pagePattern="/page/(:num)",$totalItems = 0,$itemPerPage = 10,$navigationSize = 10)
+    public function __construct($queryUrl="", $pagePattern="/page/(:num)", $totalItems = 0, $itemPerPage = 10, $navigationSize = 10)
     {
         if ($queryUrl) {
             $this->setQueryUrl($queryUrl,$pagePattern);
@@ -169,10 +160,10 @@ class Paginator {
     /**
      * Set the URL, automatically it will parse every thing to it
      * 
-     * @param type $url
+     * @param string $url
      * @return Paginator 
      */
-    public function setQueryUrl($url,$pagePattern="/page/(:num)")
+    public function setQueryUrl($url, $pagePattern="/page/(:num)")
     {
         $pattern = str_replace("(:num)","([0-9]+)",$pagePattern);
         preg_match("~$pattern~i",$url,$m);
@@ -183,9 +174,8 @@ class Paginator {
          */
         if (count($m) == 0){
           $pag_ = str_replace("(:num)",0,$pagePattern);
-          /**
-           * page pattern contain the equal sign, we'll add it to the query ?page=123 
-           */
+          
+          // page pattern contain the equal sign, we'll add it to the query ?page=123 
           if(strpos($pagePattern,"=") !== false){
               if (strpos($url,"?") !== false) {
                       $url .= "&".$pag_;
@@ -298,8 +288,7 @@ class Paginator {
      */
     public function getCurrentPage()
     {
-       return
-            ($this->params["currentPage"] <= $this->getTotalPages()) 
+       return ($this->params["currentPage"] <= $this->getTotalPages()) 
                 ? $this->params["currentPage"] 
                 : $this->getTotalPages();
     }
@@ -365,6 +354,38 @@ class Paginator {
     public function getNavigationSize()
     {
         return $this->params["navSize"];
+    }
+
+    /**
+     * Get the current page url
+     * 
+     * @return string
+     */
+    public function getCurrentPageUrl()
+    {
+        return $this->parseTplUrl($this->getCurrentPage());
+    }
+    
+    /**
+     * Get the previous page url if it exists
+     * 
+     * @return string
+     */
+    public function getPreviousPageUrl()
+    {
+        $prev = $this->getCurrentPage() - 1;
+        return ($prev > 0 && $prev < $this->getTotalPages()) ? $this->parseTplUrl($prev) : "";
+    }
+    
+    /**
+     * Get the next page url if it exists
+     * 
+     * @return string
+     */
+    public function getNextPageUrl()
+    {
+        $next = $this->getCurrentPage() + 1;
+        return ($next < $this->getTotalPages()) ? $this->parseTplUrl($next) : "";        
     }
 /*******************************************************************************/
     
@@ -472,8 +493,7 @@ class Paginator {
         return 
             "<div class=\"{$paginationClsName}\">
                 <{$this->wrapTag}>{$pagination}</{$this->wrapTag}>
-            </div>";
-                    
+            </div>";    
     }     
     
 /*******************************************************************************/
