@@ -385,7 +385,7 @@ class Paginator {
     public function getNextPageUrl()
     {
         $next = $this->getCurrentPage() + 1;
-        return ($next < $this->getTotalPages()) ? $this->parseTplUrl($next) : "";        
+        return ($next <= $this->getTotalPages()) ? $this->parseTplUrl($next) : "";        
     }
 /*******************************************************************************/
     
