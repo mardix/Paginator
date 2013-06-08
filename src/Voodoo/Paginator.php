@@ -62,7 +62,7 @@
  *      $siteUrl = "http://www.givemebeats.net/buy-beats/?genre=Hip-Hop-Rap&page=4";
  *      $pagePattern = "page=(:num)";
  *      $totalItems = 225;
- *      $Paginator = new Paginator($siteUrl,$pagePattern);
+ *      $Paginator = new Voodoo\Paginator($siteUrl, $pagePattern);
  *      $Pagination = $Paginator($totalItems);
  *      print($Pagination);
  * 
@@ -105,7 +105,7 @@ namespace Voodoo;
 class Paginator {
    
     const NAME = "Paginator";
-    const VERSION = "1.1";
+    const VERSION = "1.1.2";
     
     /**
      * Holds params 
@@ -131,7 +131,8 @@ class Paginator {
      */
     public static function CreateWithUri($pagePattern="/page/(:num)", $totalItems = 0, $itemPerPage = 10, $navigationSize = 10)
     {
-        $uri =  $_SERVER["REQUEST_SCHEME"]."://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"];
+        $uri  = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https" : "http";
+        $uri .= "://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"];
         return new self($uri, $pagePattern, $totalItems, $itemPerPage, $navigationSize);
     }
     
