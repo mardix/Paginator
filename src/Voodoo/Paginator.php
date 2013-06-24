@@ -5,188 +5,127 @@
  * -----------------------------------------------------------------------------
  * @author      Mardix (http://twitter.com/mardix)
  * @github      https://github.com/mardix/Paginator
- * @package     VoodooPHP (https://github.com/VoodooPHP/Voodoo/)
  *
- * @copyright   (c) 2012-2013 Mardix (http://github.com/mardix)
+ * @copyright   (c) 2013 Mardix (http://github.com/mardix)
  * @license     MIT
  * -----------------------------------------------------------------------------
  * 
- * ABOUT
- * -----
+ * About 
+ * 
  * Paginator is a simple class that allows you to create pagination for your application.
- * It doesn't require any database connection. It is compatible with Twitter's Bootstrap Framework, 
- * by using the CSS class pagination in the example folder
- * So it can be implemented quickly in your existing settings.
+ * It doesn't require any database connection. It only requires the total of items found
+ * and from there it will create a pagination that can be export to HTML or Array.
+ * It is also compatible with Twitter's Bootstrap Framework.
  * 
- * 
- * How it works
- * -----------
- * It reads the $queryUrl ( http://xyz.x/page/253 ) that was provided and based on the regexp pattern (ie: /page/(:num)) 
- * it extract the page number and build the pagination for all the page numbers. If the page number does't exist, i will create one 
- * for you based on the pattern
- * 
- * About $pagePattern (:num)
- * -----------
- * (:num) is our regex pattern to capture the page number and pass it to generate the pagination.
- * It is require to catch the page number properly
- * 
- *  /page/(:num) , will capture page in this pattern http://xyz.com/page/252
- *  
- *  page=(:num) , will capture the pattern http://xyz.com/?page=252
- *  
- *  Any other regexp pattern will work also
- * 
- * When a query url is set without the page number, automatically based on the page pattern, the page number will be added
- * i.e: 
- *     $queryUrl = http://xyz.com/?q=boom
- *     $pagePattern = page=(:num)
- * 
- *     the page number will be added as so at the end of the query
- *     http://xyz.com/?q=boom&page=2 
- * 
- * 
- * 
- * Example
- * With friendly url:
- * ------------------
- *      $siteUrl = "http://www.givemebeats.net/buy-beats/Hip-Hop-Rap/page/4/";
- *      $pagePattern = "/page/(:num)";
- *      $totalItems = 225;
- *      $Paginator = new Paginator($siteUrl,$pagePattern);
- *      $Pagination = $Paginator($totalItems);
- *      print($Pagination);
- * 
- * 
- * With non friendly url:
- * ------------------
- *      $siteUrl = "http://www.givemebeats.net/buy-beats/?genre=Hip-Hop-Rap&page=4";
- *      $pagePattern = "page=(:num)";
- *      $totalItems = 225;
- *      $Paginator = new Voodoo\Paginator($siteUrl, $pagePattern);
- *      $Pagination = $Paginator($totalItems);
- *      print($Pagination);
- * 
- * 
- * Quick way:
- * ---------
- *      Paginator::CreateWithUri($pagePattern,$totalItems);
- * 
- * 
- * Major Methods
- * -----------------
- * 
- * - __construct()                        : Instantiate the class
- * - setQueryUrl($queryUrl,$pagePattern)  : To set the url that will be used to create the pagination. pagePattern is a regex to catch the page number in the queryUrl
- * - setTotalItems($totalItems)           : Set the total items. It is required so it create the proper page count etc
- * - setItemsPerPage($ipp)                : Total items to display in your results page. This count will allow it to properly count pages
- * - setNavigationSize($nav)              : Crete the size of the pagination like [1][2][3][4][next]
- * - setPrevNextTitle(Prev,Next)          : To set the action next and previous
- * - toArray($totalItems)                 : Return the pagination in array. Use it if you want to use your own template to generate the pagination in HTML
- * - render($totalItems)                  : Return the pagination in HTML format
- * 
- * 
- * 
- * Other methods to access and update data before rendering
- * 
- * - getCurrentPage()                   : Return the current page number
- * - getTotalPages()                    : Return the total pages
- * - getStartCount()                    : The start count. 
- * - getEndCount()                      : The end count 
- * - getSQLOffest()                     : When using SQL query, you can use this method to give you the limit count like: 119,10 which will be used in "LIMIT 119,10"
- * - getItemsPerPage()                  : Return the total items per page
- * - getCurrentPageUrl()                : Return the full url of the current page including the page number
- * - getPreviousPageUrl()               : Return the full url of the previous page including the page number
- * - getNextPageUrl()                   : Return the full url of the next page including the page number
+ * Learn more: https://github.com/mardix/Paginator
  * 
  */
 
 namespace Voodoo;
 
-class Paginator {
-   
-    const NAME = "Paginator";
-    const VERSION = "1.1.2";
-    
-    /**
-     * Holds params 
-     * @var array 
-     */
-    protected $params  = array();
-    
-    /**
-     * Holds the template url
-     * @var string 
-     */
-    protected $templateUrl = "";
+use IteratorAggregate;
 
+class Paginator implements IteratorAggregate
+{
+    CONST VERSION = "2.0.*";
+    
+    CONST NUM = "(:num)";
+    
+    private $templateUrl;
+    private $page = 0;
+    private $totalItems = 0;
+    private $itemsPerPage = 10;
+    private $navigationSize = 10;
+    private $totalPages = 0;
+    private $pagePattern = "page=(:num)";
+    private $url = "";
+    private $prevTitle = "Prev";
+    private $nextTitle = "Next";
+    private $firstTitle = "First";
+    private $lastTitle = "Last";
+    
 
-    /**
-     * Create the Paginator with the REQUEST_URI. It's a shortcut to quickly build it with the request URI
-     * 
-     * @param regex $pagePattern - a regex pattern that will match the url and extract the page number
-     * @param int $totalItems - Total items found 
-     * @param int $itemPerPage - Total items per page
-     * @param int $navigationSize - The naviagation set size
-     * @return Paginator
-     */
-    public static function CreateWithUri($pagePattern="/page/(:num)", $totalItems = 0, $itemPerPage = 10, $navigationSize = 10)
+    
+    public function __construct($pagePattern = "") 
     {
-        $uri  = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https" : "http";
-        $uri .= "://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"];
-        return new self($uri, $pagePattern, $totalItems, $itemPerPage, $navigationSize);
+        //$this->setUrl($this->getUri(), $pagePattern);
     }
     
-    
-    
-    /**
-     * Constructor
-     * 
-     * @param string $queryUrl - The url of the pagination
-     * @param regex $pagePattern - a regex pattern that will match the url and extract the page number
-     * @param int $totalItems - Total items found 
-     * @param int $itemPerPage - Total items per page
-     * @param int $navigationSize - The naviagation set size
-     */
-    public function __construct($queryUrl="", $pagePattern="/page/(:num)", $totalItems = 0, $itemPerPage = 10, $navigationSize = 10)
+    public function setUrl($url, $pagePattern = null) 
     {
-        if ($queryUrl) {
-            $this->setQueryUrl($queryUrl,$pagePattern);
+        $this->url = $url;
+        
+        if($pagePattern) {
+            $this->pagePattern = $pagePattern;
         }
-        $this->setTotalItems($totalItems);
-        $this->setItemsPerPage($itemPerPage);
-        $this->setNavigationSize($navigationSize);
-        $this->setPrevNextTitle();
+        $this->prepareUrl();
+        return $this;
     }
-
+    
+    /**
+     * Set the items
+     * 
+     * @param int $totalItems - total items in the set
+     * @param int $itemsPerPage - total items per page
+     * @param int $navigationSize - navigation size, it will show a set for $x
+     * @return \Voodoo\Paginator
+     */
+    public function setItems($totalItems, $itemsPerPage = 10, $navigationSize = 10)
+    {
+        $this->totalItems = $totalItems;
+        $this->itemsPerPage = $itemsPerPage;
+        $this->navigationSize = $navigationSize;
+        $this->totalPages = @ceil($this->totalItems/$this->itemsPerPage);
+        return $this;
+    }
+    
+    /**
+     * Return the URI of the request
+     * 
+     * @return string
+     */
+    public function getUri()
+    {
+        $uri  = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') 
+                    || $_SERVER['SERVER_PORT'] == 443) ? "https" : "http";
+        $uri .= "://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"];
+        return $uri;
+    }
+    
     /**
      * Set the URL, automatically it will parse every thing to it
      * 
      * @param string $url
      * @return Paginator 
      */
-    public function setQueryUrl($url, $pagePattern="/page/(:num)")
+    private function prepareUrl()
     {
-        $pattern = str_replace("(:num)","([0-9]+)",$pagePattern);
-        preg_match("~$pattern~i",$url,$m);
+        $url = $this->url;
+        $pagePattern = $this->pagePattern;
+        
+        $pattern = str_replace(self::NUM, "([0-9]+)" ,$pagePattern);
+        preg_match("~$pattern~i", $url, $m);
         /**
          * No match found. 
          * We'll add the pagination in the url, so this way it can be ready for next pages.
          * This way a url http://xyz.com/?q=boom , becomes http://xyz.com/?q=boom&page=2
          */
         if (count($m) == 0){
-          $pag_ = str_replace("(:num)",0,$pagePattern);
+          $pag_ = str_replace(self::NUM, 0, $pagePattern);
           
           // page pattern contain the equal sign, we'll add it to the query ?page=123 
-          if(strpos($pagePattern,"=") !== false){
+          if (strpos($pagePattern, "=") !== false){
               if (strpos($url,"?") !== false) {
                       $url .= "&".$pag_;
               } else {
                   $url .= "?".$pag_;
               }
-            return $this->setQueryUrl($url,$pagePattern);
+            return $this->setUrl($url,$pagePattern);
+            
           }  else if (strpos($pagePattern,"/") !== false){ //Friendly url : /page/123
+              
               if (strpos($url,"?") !== false) {
-                  list($segment,$query) = explode("?",$url,2);
+                  list($segment,$query) = explode("?", $url, 2);
                     if(preg_match("/\/$/",$segment)){
                         $url = $segment.(preg_replace("/^\//","",$pag_));
                         $url .= ((preg_match("/\/$/",$pag_)) ? "" : "/"). "?{$query}";
@@ -201,7 +140,7 @@ class Paginator {
                         $url .= $pag_;    
                     }
               }
-            return $this->setQueryUrl($url,$pagePattern);
+            return $this->setUrl($url, $pagePattern);
           }
         }        
         $match = current($m);
@@ -209,266 +148,245 @@ class Paginator {
         $page = $last ? $last : 1;
         
         // TemplateUrl will be used to create all the page numbers 
-        $this->templateUrl = str_replace($match,preg_replace("/[0-9]+/","(#pageNumber)",$match),$url);
-        $this->setCurrentPage($page);
+        $replacePageNumber = preg_replace("/[0-9]+/", "(#pageNumber)",$match);
+        $this->templateUrl = str_replace($match, $replacePageNumber, $url);
+        $this->setPage($page);
         return $this;
     }
     
-     /**
-     * To set the previous and next title
-      * 
-     * @param type $prev : Prev | &laquo; | &larr;
-     * @param type $next : Next | &raquo; | &rarr;
-     * @return Paginator 
-     */
-    public function setPrevNextTitle($prev = "Prev",$next = "Next")
-    {
-        $this->params["prevTitle"] = $prev;
-        $this->params["nextTitle"] = $next;
-        return $this;
-    }
-    
-    /**
-     * Set the total items. It will be used to determined the size of the pagination set
-     * 
-     * @param int $items
-     * @return Paginator 
-     */
-    public function setTotalItems($items = 0)
-    {
-        $this->params["totalItems"] = $items;
-        return $this;
-    }
-    
-    /**
-     * Get the total items 
-     * 
-     * @return int
-     */
-    public function getTotalItems()
-    {
-        return $this->params["totalItems"];
-    }
-    
-    /**
-     * Set the items per page
-     * @param type $ipp
-     * @return Paginator 
-     */
-    public function setItemsPerPage($ipp = 10)
-    {
-        $this->params["itemsPerPage"] = $ipp;
-        return $this;
-    }
-    
-    /**
-     * Retrieve the items per page
-     * 
-     * @return int
-     */
-    public function getItemsPerPage()
-    {
-        return $this->params["itemsPerPage"];
-    }
-
     /**
      * Set the current page
-     * 
      * @param int $page
-     * @return Paginator 
+     * @return Voodoo\Paginator
      */
-    public function setCurrentPage($page = 1)
+    public function setPage($page = 1)
     {
-        $this->params["currentPage"] = $page;
+        $this->page = $page;
         return $this;
     }
     
-    /**
-     * Get the current page
-     * @return type 
-     */
-    public function getCurrentPage()
+    
+    public function addParams(Array $params)
     {
-       return ($this->params["currentPage"] <= $this->getTotalPages()) 
-                ? $this->params["currentPage"] 
-                : $this->getTotalPages();
+        
     }
     
+    
     /**
-     * Get the pagination start count
+     * Return the current page number
      * 
-     * @return int 
+     * @return int
      */
-    public function getStartCount()
+    public function getPage()
     {
-      return (int) ($this->getItemsPerPage() * ($this->getCurrentPage() - 1));
-    }
-    
-    /**
-     * Get the pagination end count
-     * @return int 
-     */
-    public function getEndCount()
-    {
-        return (int) ((($this->getItemsPerPage() - 1) * $this->getCurrentPage()) + $this->getCurrentPage() );           
-    }
-    
-    /**
-     * Return the offset for sql queries, specially
-     * @return START,LIMIT 
-     * 
-     * @tip: SQL tip. It's best to do two queries one with SELECT COUNT(*) FROM tableName WHERE X
-     *       set the setTotalItems()
-     */
-    public function getSQLOffset()
-    {
-       return $this->getStartCount().",".$this->getItemsPerPage();
+        return $this->page;
     }
 
     /**
-     * Get the total pages
+     * To get the start count of the items. Starts at 0
      * 
-     * @return int 
+     * @return int
      */
-    public function getTotalPages()
-    {
-         return @ceil($this->getTotalItems()/$this->getItemsPerPage());
+    public function getStart()
+    {   
+        return $this->itemsPerPage * ($this->page - 1);    
     }
     
     /**
-     * Set the navigation size
+     * To get the end count of the items. Ends at -1
      * 
-     * @param int $set
-     * @return Paginator 
+     * @return int
      */
-    public function setNavigationSize($set = 10)
+    public function getEnd()
     {
-        $this->params["navSize"] = $set;
-        return $this;
+        return (($this->itemsPerPage - 1) * $this->page) + ($this->page - 1);
     }
     
     /**
-     * Get the navigation size
+     * Return the total pages
      * 
-     * @return int 
+     * @return int
      */
-    public function getNavigationSize()
+    public function count()
     {
-        return $this->params["navSize"];
+        return $this->totalPages;
     }
+    
+    /**
+     * Return the items per page
+     * 
+     * @return int
+     */
+    public function getPerPage()
+    {
+        return $this->itemsPerPage;
+    }
+    
 
     /**
-     * Get the current page url
-     * 
+     * Return the current page url or the url for a page number
+     * @param int $pageNumber
      * @return string
      */
-    public function getCurrentPageUrl()
+    public function getPageUrl($pageNumber = null)
     {
-        return $this->parseTplUrl($this->getCurrentPage());
+        $pageNumber = $pageNumber ?: $this->page; 
+        
+        if ($pageNumber > 0 && $pageNumber <= $this->totalPages) {
+            return $this->parseTplUrl($pageNumber);
+        } else {
+            return "";
+        }      
     }
     
     /**
-     * Get the previous page url if it exists
-     * 
-     * @return string
-     */
-    public function getPreviousPageUrl()
-    {
-        $prev = $this->getCurrentPage() - 1;
-        return ($prev > 0 && $prev < $this->getTotalPages()) ? $this->parseTplUrl($prev) : "";
-    }
-    
-    /**
-     * Get the next page url if it exists
+     * Return the next page url
      * 
      * @return string
      */
     public function getNextPageUrl()
     {
-        $next = $this->getCurrentPage() + 1;
-        return ($next <= $this->getTotalPages()) ? $this->parseTplUrl($next) : "";        
+        return $this->getPageUrl($this->page + 1);        
     }
-/*******************************************************************************/
+    
+    /**
+     * Get the prev page url
+     * 
+     * @return string
+     */
+    public function getPrevPageUrl()
+    {
+        return $this->getPageUrl($this->page - 1);      
+    }
+    
+    /**
+     * This method allow the iteration inside of foreach()
+     *
+     * @return Array
+     */
+    public function getIterator()
+    {
+        return $this->toArray();
+    }
+     
+     /**
+     * To set the previous and next title
+      * 
+     * @param type $prev : Prev | &laquo; | &larr;
+     * @param type $next : Next | &raquo; | &rarr;
+     * @return \Voodoo\Paginator 
+     */
+    public function setPrevNextTitle($prev = "Prev", $next = "Next")
+    {
+        $this->prevTitle = $prev;
+        $this->nextTitle = $next;
+        return $this;
+    }
+    
+     /**
+     * To set the first and last title
+      * 
+     * @param string $first : First | &laquo; | &larr;
+     * @param string $last : Last | &raquo; | &rarr;
+     * @return \Voodoo\Paginator 
+     */
+    public function setFirstLastTitle($first = "First", $last = "Last")
+    {
+        $this->firstTitle = $first;
+        $this->lastTitle = $last;
+        return $this;
+    }
+
+    
     
     /**
      * toArray() export the pagination into an array. This array can be used for your own template or for other usafe
      * @param int $totalItems - the total Items found
      * @return Array 
-     *     Array(
-     *          array(
-     *                "PageNumber", // the page number
-     *                "Label", // the label for the page number
-     *                "Url", // the url 
+     *     [
+     *          [
+     *                "pageNumber", // the page number
+     *                "label", // the label for the page number
+     *                "url", // the url 
      *                "isCurrent" // bool  set if page is current or not
-     *          )
-     *      )
+     *          ],
+     *          ...
+     *      ]
      */
-    public function toArray($totalItems = 0)
+    public function toArray()
     {
-        $Navigation = array();
-        if ($totalItems) {
-            $this->setTotalItems($totalItems);
-        }
-        
-        $totalPages = $this->getTotalPages();
-        $navSize = $this->getNavigationSize();
-        $currentPage = $this->getCurrentPage();
+        $navigation = [];
 
-        if($totalPages){
+        if($this->totalPages){
             
-            $halfSet = @ceil($navSize/2);
+            $halfSet = @ceil($this->navigationSize/2);
             $start = 1;
-            $end = ($totalPages<$navSize) ? $totalPages : $navSize;
+            $end = ($this->totalPages < $this->navigationSize) ? $this->totalPages : $this->navigationSize;
             
-            $usePrevNextNav = ($totalPages > $navSize) ? true : false;
+            $showPrevNextNav = ($this->totalPages > $this->navigationSize) ? true : false;
             
-            if ($currentPage >= $navSize) {
-               $start = $currentPage - $navSize + $halfSet +1;
-               $end = $currentPage + $halfSet -1;
+            if ($this->page >= $this->navigationSize) {
+               $start = $this->page - $this->navigationSize + $halfSet + 1;
+               $end = $this->page + $halfSet -1;
             }
-            if ($end > $totalPages) {
-                $s = $totalPages - $navSize;
+            if ($end > $this->totalPages) {
+                $s = $this->totalPages - $this->navigationSize;
                 $start = $s ? $s : 1;
-                $end = $totalPages;  
+                $end = $this->totalPages;  
             }
-            // Previous   
-            $prev = $currentPage - 1;
-            if ($currentPage >= $navSize && $usePrevNextNav) {
-                $Navigation[] = array(
-                    "PageNumber" => $prev,
-                    "Label" => $this->prevTitle,
-                    "Url" => $this->parseTplUrl($prev),
-                    "isCurrent" => false
-                );   
+             
+            $prev = $this->page - 1;
+            if ($this->page >= $this->navigationSize && $showPrevNextNav) {
+                // First
+                $navigation[] = $this->buildPaginationModel(1, $this->firstTitle, false, true, false); 
+                // Prev
+                $navigation[] = $this->buildPaginationModel($prev, $this->prevTitle);
             }                          
-            // All the pages
-            for ($i=$start; $i<=$end; $i++){
-                $Navigation[] = array(
-                    "PageNumber" => $i,
-                    "Label" => $i,
-                    "Url" => $this->parseTplUrl($i),
-                    "isCurrent" => ($i == $currentPage) ? true : false,
-                );                
+
+            for ($i = $start; $i <= $end; $i++){
+                $isCurrent = ($i == $this->page) ? true : false;
+                $navigation[] = $this->buildPaginationModel($i, $i, $isCurrent);            
             }
-            // Next 
-            $next = $currentPage + 1;                          
-            if ($next < $totalPages && $end<$totalPages && $usePrevNextNav ) {
-                $Navigation[] = array(
-                    "PageNumber" => $next,
-                    "Label" => $this->nextTitle,
-                    "Url" => $this->parseTplUrl($next),
-                    "isCurrent" => false
-                );  
+
+            $next = $this->page + 1;                          
+            if ($next < $this->totalPages && $end < $this->totalPages && $showPrevNextNav ) {
+                $navigation[] = $this->buildPaginationModel($next, $this->nextTitle); 
             }
+            
+            if($this->totalPages > $this->navigationSize) {
+                $navigation[] = $this->buildPaginationModel($this->totalPages, $this->lastTitle, false, false, true); 
+            }
+            
+            
         }
-        return $Navigation;
+        return $navigation;
+    }   
+    
+    /**
+     * Build the pagination model
+     * 
+     * @param int $pageNumber
+     * @param string $label
+     * @param bool $isCurrent
+     * @param bool $isNavFirst
+     * @param bool $isNavLast
+     * @return Array
+     */
+    private function buildPaginationModel($pageNumber, $label, $isCurrent = false, $isNavFirst = false, $isNavLast = false)
+    {
+        return [
+                    "pageNumber" => $pageNumber,
+                    "label" => $label,
+                    "url" => $this->parseTplUrl($pageNumber),
+                    "isCurrent" => $isCurrent,
+                    "isNavigationFirst" => $isNavFirst, 
+                    "isNavigationLast" => $isNavLast                     
+                ];
     }
     
-
     /**
      * Render the paginator in HTML format
      * 
-     * @param int $totalItems - The total Items
      * @param string $paginationClsName - The class name of the pagination
      * @param string $wrapTag
      * @param string $listTag
@@ -483,76 +401,35 @@ class Paginator {
      * </div>
      * </code>
      */
-    public function render($totalItems = 0,$paginationClsName="pagination",$wrapTag = "ul",$listTag = "li")
+    public function toHtml($paginationClsName="pagination", $wrapTag = "ul", $listTag = "li")
     {
-        $this->listTag = $listTag;
-        $this->wrapTag = $wrapTag;
-        $pagination = "";
-        foreach ($this->toArray($totalItems) as $page) {
-            $pagination .= $this->wrapList($this->aHref($page["Url"],$page["Label"]),$page["isCurrent"],false);
+        $list = "";
+        foreach ($this->toArray() as $page) {
+            $href = "<a href=\"{$page["url"]}\">{$page["label"]}</a>";
+            $tagClass = ($page["isCurrent"]) ? " class=\"active\" " : "";
+            $list .= "<{$listTag}{$tagClass}>{$href}</{$listTag}>".PHP_EOL; 
         }
         return 
             "<div class=\"{$paginationClsName}\">
-                <{$this->wrapTag}>{$pagination}</{$this->wrapTag}>
+                <{$wrapTag}>{$list}</{$wrapTag}>
             </div>";    
-    }     
+    } 
     
-/*******************************************************************************/
-
+    
+    public function __toString() 
+    {
+        return $this->toHtml();
+    }
+    
     /**
      * Parse a page number in the template url
      * 
      * @param int $pageNumber
      * @return string 
      */
-    protected function parseTplUrl($pageNumber)
+    private function parseTplUrl($pageNumber)
     {
-        return str_replace("(#pageNumber)",$pageNumber,$this->templateUrl);
+        return str_replace("(#pageNumber)", $pageNumber, $this->templateUrl);
     }
-    
-    /**
-     * To create an <a href> link
-     * 
-     * @param int $pageNumber
-     * @param string $txt
-     * @return string 
-     */
-    protected function aHref($url,$txt)
-    {
-        return "<a href=\"{$url}\">{$txt}</a>";
-    }
-
-    /**
-     * Create a wrap list, ie: <li></li>
-     * 
-     * @param string $html
-     * @param bool $isActive - To set the active class in this element
-     * @param bool $isDisabled - To set the disabled class in this element
-     * @return string 
-     */
-    protected function wrapList($html,$isActive = false, $isDisabled = false)
-    {
-        $activeCls = $isActive ? " active " : "";
-        $disableCls = $isDisabled ? " disabled " : "";
-        return  "<{$this->listTag} class=\"{$activeCls} {$disableCls}\">{$html}</{$this->listTag}>\n";
-    }
-    
-    
-/*******************************************************************************/
-
-    /** MAGIC METHODS TAAADDAAAAA!!!! **/
-    public function __set($key,$value)
-    {
-        $this->params[$key] = $value;
-    }
-    
-    public function __get($key)
-    {
-        return $this->params[$key];
-    }
-    
-    public function __toString() 
-    {
-        return $this->render();
-    }    
+        
 }
