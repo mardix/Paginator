@@ -1,33 +1,69 @@
-#Paginator
+# Paginator 2.x.x
+
+#### A paginator that makes it easy and simple
+
+---
+ 
+Name: [Paginator](http://github.com/mardix/Paginator)
+
+License: MIT
+
+Author: [Mardix](http://github.com/mardix)
+
+Version : 2.x.x
+
+Requirements: PHP >= 5.4
 
 ---
 
-### What is Paginator?
 
-Paginator is a simple class that allows you to create pagination for your application.
+## About Paginator
 
-It doesn't require any database connection. It is compatible with Twitter's Bootstrap Framework, by using the CSS class pagination.
-
-So it can be implemented quickly in your existing settings.
-
-
-
-
-#### And who created it?
-Me. Mardix. You can follow me  [@mardix](http://twitter.com/mardix), or check out my github: [github.com/mardix](https://github.com/mardix) to check out some of my other library that you may want to fork.
-
-So Holla!
+Paginator is a simple class that allows you to create pagination for your application. 
+It doesn't require any database connection. It only requires the total of items found 
+and from there it will create a pagination that can be export to HTML or Array. 
+It is also compatible with Twitter's Bootstrap Framework.
 
 
 ---
 
 ### How it works?
 
-It reads the $queryUrl ( http://xyz.x/page/253 ) that was provided and based on the regexp pattern (ie: /page/(:num)) it extract the page number and build the pagination for all the page numbers.
+Paginator requires the total of items in the results, then it reads the URL (i.e: http://xyz.x/page/253 )  provided and based on the regexp pattern (ie: /page/(:num)) it extracts the page number and build the pagination for all the page numbers. Just like that.
 
 
+	<?php
+	
+	include "../src/Voodoo/Paginator.php";
+	
+	$url = "http://mysite.com";
+	$pagePattern = "/page/(:num)";
+	$totalItems = 150;
+	$totalPerPage = 10;
+	
+	$paginator = (new Voodoo\Paginator)
+	                ->setUrl($url, $pagePattern)
+	                ->setItems($totalItems, $totalPerPage);
+	?>
+	
+	<html>
+	    <head>
+	        <link rel="stylesheet" href="./examples/paginator.css">
+	        <title>Paginator Example</title>
+	    </head>
+	    
+	    <body>
+	        <?= $paginator; ?>
+	    </body>
+	</html>
 
-### About the regexp pattern: **(:num)**
+Will  render something like this:
+
+	[First] [<< Prev] [1] [2] [3] [4] [5] [6] [Next >>] [Last]
+
+---
+
+## About the regexp pattern: **(:num)**
 
 
 ***(:num)*** is our regex pattern to capture the page number and pass it to generate the pagination. It is require to catch the page number properly
@@ -36,73 +72,50 @@ It reads the $queryUrl ( http://xyz.x/page/253 ) that was provided and based on 
  
 **page=(:num)** : will capture the pattern http://xyz.com/?page=252
 
-Any other regexp pattern will work also
-
----
-### Public Methods
-
-
-**render**($totalItems)                  : Return the pagination in HTML format
-
-**toArray**($totalItems)                 : Return the pagination in array. Use it if you want to use your own template to generate the pagination in HTML
-  
-
-#### Setters
-
-**setQueryUrl**($queryUrl,$pagePattern)  : To set the url that will be used to create the pagination. $pagePattern is a regex to catch the page number in the queryUrl
-  
-**setTotalItems**($totalItems)         : Set the total items. It is required so it create the proper page count etc
-  
-**setItemsPerPage**($ipp)                : Total items to display in your results page. This count will allow it to properly count pages
-  
-**setNavigationSize**($nav)              : Crete the size of the pagination like [1][2][3][4][next]
-  
-**setPrevNextTitle**(Prev,Next)         : To set the action next and previous
-
-
-#### Getters
-
-***getCurrentPage()***                  : Return the current page number
-
-***getTotalPages()***                   : Return the total pages
-
-***getStartCount()***                   : Return the start count. 
-
-***getEndCount()***                      : Return the end count 
-
-***getSQLOffest()***                     : When using SQL query, you can use this method to give you the limit count like: 119,10 which will be used in "LIMIT 119,10"
-
-***getItemsPerPage()***                  : Return the total items per page
-
+Any other regexp pattern will work also, as long it contains **(:num)**
 
 ---
 
-## Example
+## Using with SQL
 
-```php
-<?php
-include(dirname(__DIR__)."/src/Voodoo/Paginator.php");
+	<?php
+	/**
+	 * A simple example
+	 */
+	include(dirname(__DIR__)."/src/Voodoo/Paginator.php");
+	
+	$tableName = "myTable";
+	$queryCount = "SELECT COUNT(id) AS count FROM {$tableName}";
+	
+	$totalItems = $result["count"];
+	$totalPerPage = 10;
+	
+	$url = "http://mysite.com";
+	$pagePattern = "/page/(:num)";
+	$paginator = (new Voodoo\Paginator)
+	                ->setUrl($url, $pagePattern)
+	                ->setItems($totalItems, $totalPerPage);
+	
+	$limit = $paginator->getPerPage();
+	$offset = $paginator->getStart();
+	$query = "SELECT * FROM {$tableName} LIMIT {$limit} OFFSET {$offset}";
+	?>
+	
+	<html>
+	    <head>
+	        <link rel="stylesheet" href="./paginator.css">
+	        <title>Mardix's Paginator Example</title>
+	    </head>
+	    
+	    <body>
+	        <h2>Paginator Example</h2>
+	        <?php
+	           echo $paginator;
+	        ?>
+	        
+	    </body>
+	</html>
 
-$queryUrl = "http://www.givemebeats.net/buy-beats/Hip-Hop-Rap/page/4/";
-$pagePattern = "/page/(:num)";
-$Paginator = new Voodoo\Paginator($queryUrl,$pagePattern);
-$Paginator
-    ->setTotalItems(225) 
-    ->setItemsPerPage(10)
-    ->setNavigationSize(10);
-
-//Use the getSQLOffset() to create a SQL offset limit 
-$SQLOffset = $Paginator->getSQLOffset();
-$SQL = "SELECT * FROM my_table WHERE X=Y LIMIT {$SQLOffset}";
-         
-$Pagination = $Paginator->render();
-
-print($Pagination);
-
-```
-
-[1] [2] [3] [4] [5]  [Next]
----
 
 
 Please refer to the example directory for examples

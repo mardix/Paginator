@@ -123,7 +123,7 @@ class Paginator implements IteratorAggregate
             return $this->setUrl($url,$pagePattern);
             
           }  else if (strpos($pagePattern,"/") !== false){ //Friendly url : /page/123
-              
+              $segment = "";
               if (strpos($url,"?") !== false) {
                   list($segment,$query) = explode("?", $url, 2);
                     if(preg_match("/\/$/",$segment)){

@@ -1,57 +1,25 @@
 <?php
 
-include(dirname(__DIR__)."/src/Voodoo/Paginator.php");
+include "../src/Voodoo/Paginator.php";
 
+$url = "http://mysite.com";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
 
- $queryUrl = "http://www.givemebeats.net/buy-beats/Hip-Hop-Rap/page/12/";
- 
- $pagePattern = "/page/(:num)";
- 
- $Paginator = new Voodoo\Paginator($queryUrl,$pagePattern);
- 
- /**
- 
- $pagePattern = "page=(:num)";
- 
- $Paginator = Paginator::CreateWithUri($pagePattern);
-   
-  */
- 
- $Paginator->setTotalItems(225) // Total items found. This can be calculated previously
-           ->setItemsPerPage(10) // Total items to display per page
-           ->setNavigationSize(10); // The pagination navigation size.
- 
- 
- /**
-  * Use the getSQLOffset() to create a SQL offset limit 
-  */
- $SQLOffset = $Paginator->getSQLOffset();
- $SQL = "
-     SELECT 
-            *
-     FROM
-            my_table
-     WHERE
-            X=Y
-     LIMIT
-           {$SQLOffset}
-";
-         
-$Pagination = $Paginator->render();
-
+$paginator = (new Voodoo\Paginator)
+                ->setUrl($url, $pagePattern)
+                ->setItems($totalItems, $totalPerPage);
 ?>
 
 <html>
     <head>
-        <link rel="stylesheet" href="./paginator.css">
-        <title>Mardix's Paginator Example</title>
+        <link rel="stylesheet" href="./examples/paginator.css">
+        <title>Paginator Example</title>
     </head>
     
     <body>
-        <h2>Paginator Example</h2>
-        <?php
-           print $Pagination;
-        ?>
-        
+        <h2>Pages</h2>
+        <?= $paginator; ?>
     </body>
 </html>
