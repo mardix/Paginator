@@ -32,7 +32,7 @@ You can just download Paginator as is, or with Composer.
 
 To install with composer, add the following in the require key in your **composer.json** file
 
-	"voodoophp/paginat": "2.*"
+	"voodoophp/paginator": "2.*"
 
 composer.json
 
