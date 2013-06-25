@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Paginator by mardix</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Paginator</h1>
+        <h2>Paginator is a simple class that allows you to create pagination. It doesn't require any database connection.</h2>
+        <a href="https://github.com/mardix/Paginator" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a name="paginator-2xx" class="anchor" href="#paginator-2xx"><span class="octicon octicon-link"></span></a>Paginator 2.x.x</h1>
+
+<h4>
+<a name="a-paginator-that-makes-it-easy-and-simple" class="anchor" href="#a-paginator-that-makes-it-easy-and-simple"><span class="octicon octicon-link"></span></a>A paginator that makes it easy and simple</h4>
+
+<hr><p>Name: <a href="http://github.com/mardix/Paginator">Paginator</a></p>
+
+<p>License: MIT</p>
+
+<p>Author: <a href="http://github.com/mardix">Mardix</a></p>
+
+<p>Version : 2.x.x</p>
+
+<p>Requirements: PHP &gt;= 5.4</p>
+
+<hr><h2>
+<a name="about-paginator" class="anchor" href="#about-paginator"><span class="octicon octicon-link"></span></a>About Paginator</h2>
+
+<p>Paginator is a simple class that allows you to create pagination for your application. 
+It doesn't require any database connection. It only requires the total of items found 
+and from there it will create a pagination that can be export to HTML or Array. 
+It is also compatible with Twitter's Bootstrap Framework.</p>
+
+<hr><h2>
+<a name="install-paginator" class="anchor" href="#install-paginator"><span class="octicon octicon-link"></span></a>Install Paginator</h2>
+
+<p>You can just download Paginator as is, or with Composer. </p>
+
+<p>To install with composer, add the following in the require key in your <strong>composer.json</strong> file</p>
+
+<pre><code>"voodoophp/paginator": "2.*"
+</code></pre>
+
+<p>composer.json</p>
+
+<pre><code>{
+    "name": "voodoophp/myapp",
+    "description": "My awesome Voodoo App",
+    "require": {
+        "voodoophp/paginator": "2.*"
+    }
+}
+</code></pre>
+
+<hr><h3>
+<a name="create-a-pagination" class="anchor" href="#create-a-pagination"><span class="octicon octicon-link"></span></a>Create a Pagination</h3>
+
+<p>Paginator makes it easy to create pagination. It only requires the URL that contains the page number pattern, the total items, and the total of items per page. </p>
+
+<pre><code>http://site.com/search?q=flower&amp;page=15
+</code></pre>
+
+<p>or</p>
+
+<pre><code>http://site.com/genres/pop/page/15
+</code></pre>
+
+<p>Paginator will automatically match the page number with the url above, and create pagination for the rest of the pages based on the total items and items per page provided.</p>
+
+<h3>
+<a name="catching-the-page-number" class="anchor" href="#catching-the-page-number"><span class="octicon octicon-link"></span></a>Catching the page number</h3>
+
+<p>Paginator requires the keyword <strong>(:num)</strong> in the page number pattern to match the page number in the URL. </p>
+
+<p>Page number pattern are set in the following format</p>
+
+<p>For friendly URL, it will capture <a href="http://site.com/page/25">http://site.com/page/25</a></p>
+
+<pre><code>/page/(:num)
+</code></pre>
+
+<p>For normal URL, it will capture <a href="http://site.com/?page=25">http://site.com/?page=25</a></p>
+
+<pre><code>page=(:num)
+</code></pre>
+
+<p>Page number pattern is set in </p>
+
+<pre><code>Voodoo\Paginator::setUrl($url, $pagePattern);
+</code></pre>
+
+<p>On both examples it will catch the page number [**25**] and create from there the start and the end of the pagination.</p>
+
+<p>Any variation of the page number pattern is OK, as long as it includes <strong>(:num)</strong> </p>
+
+<h3>
+<a name="a-simple-example" class="anchor" href="#a-simple-example"><span class="octicon octicon-link"></span></a>A Simple Example</h3>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+// Pretending the the request url is: 
+// http://mysite.com.com/hip-hop/page/5
+
+// to catch the page number pattern in the request url
+$pagePattern = "/page/(:num)"; 
+
+// Some pre-calculated number
+$totalItems = 150; 
+
+// Total items to show per page
+$totalPerPage = 10; 
+
+$paginator = (new Voodoo\Paginator($pagePattern))
+                -&gt;setItems($totalItems, $totalPerPage);
+?&gt;
+
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;link rel="stylesheet" href="./assets/paginator.css"&gt;
+        &lt;title&gt;Paginator Example&lt;/title&gt;
+    &lt;/head&gt;
+
+    &lt;body&gt;
+        &lt;?= $paginator; ?&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>Will  render something like this:</p>
+
+<pre><code>[First] [&lt;&lt; Prev] [1] [2] [3] [4] [5] [6] [Next &gt;&gt;] [Last]
+</code></pre>
+
+<p>With links that look like: </p>
+
+<pre><code>&lt;a href='http://mysite.com/hip-hop/page/6'&gt;6&lt;/a&gt;
+</code></pre>
+
+<hr><h3>
+<a name="methods" class="anchor" href="#methods"><span class="octicon octicon-link"></span></a>Methods</h3>
+
+<hr><h4>
+<a name="voodoopaginator__construct" class="anchor" href="#voodoopaginator__construct"><span class="octicon octicon-link"></span></a>Voodoo\Paginator::__construct()</h4>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$paginator = new Voodoo\Paginator;
+</code></pre>
+
+<hr><h4>
+<a name="voodoopaginatorseturl" class="anchor" href="#voodoopaginatorseturl"><span class="octicon octicon-link"></span></a>Voodoo\Paginator::setUrl()</h4>
+
+<p>To set the url and the  page number pattern</p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com";
+$pagePattern = "/page/(:num)";
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern);
+</code></pre>
+
+<h5>
+<a name="alternative-with-the-url-being-set-automatically" class="anchor" href="#alternative-with-the-url-being-set-automatically"><span class="octicon octicon-link"></span></a>Alternative with the URL being set automatically</h5>
+
+<p>Paginator will set the URL automatically based on the request URI if setUrl() is not called. All the paginations will be based on the current url. </p>
+
+<p>In the example below, the __construct() accepts the pagePattern and  create the pagination url from the getUri();</p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$pagePattern = "/page/(:num)";
+
+$paginator = (new Voodoo\Paginator($pagePattern));
+</code></pre>
+
+<hr><h4>
+<a name="voodoopaginatorsetitems" class="anchor" href="#voodoopaginatorsetitems"><span class="octicon octicon-link"></span></a>Voodoo\Paginator::setItems()</h4>
+
+<p>To set the items, total items per page, and the pagination navigation size</p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage);
+</code></pre>
+
+<hr><h4>
+<a name="voodoopaginatorsetpage" class="anchor" href="#voodoopaginatorsetpage"><span class="octicon octicon-link"></span></a>Voodoo\Paginator::setPage()</h4>
+
+<p>By default, Paginator will catch the page number from the URL, but if you want to set the current page manually, setPage let you do so</p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage)
+                -&gt;setPage(4);
+</code></pre>
+
+<hr><h4>
+<a name="voodoopaginatorsetprevnexttitle" class="anchor" href="#voodoopaginatorsetprevnexttitle"><span class="octicon octicon-link"></span></a>Voodoo\Paginator::setPrevNextTitle()</h4>
+
+<p>To set the Prev and Next title when the pagination is long.
+By default it is set to <strong>Prev</strong> and <strong>Next</strong></p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage)
+                -&gt;setPage(4)
+                -&gt;setPrevNextTitle("Prev",  "Next");
+</code></pre>
+
+<hr><h4>
+<a name="voodoopaginatorsetfirstlasttitle" class="anchor" href="#voodoopaginatorsetfirstlasttitle"><span class="octicon octicon-link"></span></a>Voodoo\Paginator::setFirstLastTitle()</h4>
+
+<p>To set the First and Last title when the pagination is long.
+By default it is set to <strong>First</strong> and <strong>Last</strong></p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage)
+                -&gt;setPage(4)
+                -&gt;setPrevNextTitle("Prev",  "Next")
+                -&gt;setFirstLastTitle("First", "Last");
+</code></pre>
+
+<hr><h4>
+<a name="array-voodoopaginatortoarray" class="anchor" href="#array-voodoopaginatortoarray"><span class="octicon octicon-link"></span></a>Array Voodoo\Paginator::toArray()</h4>
+
+<p>Will return the pagination data as an array which be used to create the pagination.</p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage)
+                -&gt;setPage(4)
+                -&gt;setPrevNextTitle("Prev",  "Next")
+                -&gt;setFirstLastTitle("First", "Last");
+
+ $pagination = $paginator-&gt;toArray();
+</code></pre>
+
+<p>toArray() will return an array similar to this:</p>
+
+<pre><code>[
+    [
+        "page_number" =&gt; 1,
+        "label" =&gt; "First",
+        "url" =&gt; "http://mysite.com/pop/page/1",
+        "is_current" =&gt; false,
+        "is_first" =&gt; true,                
+    ],
+    [
+        "page_number" =&gt; 1,
+        "label" =&gt; "Prev",
+        "url" =&gt; "http://mysite.com/pop/page/1",
+        "is_current" =&gt; false,
+        "is_prev" =&gt; true,                   
+    ],  
+    [
+        "page_number" =&gt; 1,
+        "label" =&gt; 1,
+        "url" =&gt; "http://mysite.com/pop/page/1",
+        "is_current" =&gt; true                   
+    ],
+    [
+        "page_number" =&gt; 2,
+        "label" =&gt; 2,
+        "url" =&gt; "http://mysite.com/pop/page/2",
+        "is_current" =&gt; false                   
+    ],
+    ...
+    [
+        "page_number" =&gt; "10",
+        "label" =&gt; "Next",
+        "url" =&gt; "http://mysite.com/pop/page/10",
+        "is_current" =&gt; false,
+        "is_next" =&gt; true,                     
+    ],  
+    [
+        "page_number" =&gt; 15,
+        "label" =&gt; "Last",
+        "url" =&gt; "http://mysite.com/pop/page/15",
+        "is_current" =&gt; false,
+        "is_last" =&gt; true,                  
+    ]   
+]
+</code></pre>
+
+<h3>
+<a name="manually-create-the-pagination-with-toarray" class="anchor" href="#manually-create-the-pagination-with-toarray"><span class="octicon octicon-link"></span></a>Manually create the pagination with toArray()</h3>
+
+<pre><code>&lt;ul&gt;
+    &lt;?php foreach($paginator-&gt;toArray() as $page) : ?&gt;
+        &lt;li class='&lt;?= ($page["is_current"]) ? "active" : ""; ?&gt;'&gt;
+            &lt;a href='&lt;?= $page["url"]; ?&gt;'&gt;&lt;?= $page["label"]; ?&gt;&lt;/a&gt;
+        &lt;/li&gt;
+    &lt;?php endforeach; ?&gt;
+&lt;/ul&gt;
+</code></pre>
+
+<hr><h4>
+<a name="string-voodoopaginatortohtml" class="anchor" href="#string-voodoopaginatortohtml"><span class="octicon octicon-link"></span></a>String Voodoo\Paginator::toHtml()</h4>
+
+<p>Will return a formatted HTML, compatible with Bootstrap framework</p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage)
+                -&gt;setPage(4)
+                -&gt;setPrevNextTitle("Prev",  "Next")
+                -&gt;setFirstLastTitle("First", "Last");
+
+ $cssClassName = "pagination";
+
+ echo $paginator-&gt;toHtml($cssClassName);
+</code></pre>
+
+<h4>
+<a name="string-voodoopaginator__tostring" class="anchor" href="#string-voodoopaginator__tostring"><span class="octicon octicon-link"></span></a>String Voodoo\Paginator::__toString()</h4>
+
+<p>Same as toHtml(), except it's when someone is echoing the paginator object</p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage)
+                -&gt;setPage(4)
+                -&gt;setPrevNextTitle("Prev",  "Next")
+                -&gt;setFirstLastTitle("First", "Last");
+
+ echo $paginator;
+</code></pre>
+
+<hr><h3>
+<a name="getters" class="anchor" href="#getters"><span class="octicon octicon-link"></span></a>Getters</h3>
+
+<h4>
+<a name="voodoopaginatorgeturi" class="anchor" href="#voodoopaginatorgeturi"><span class="octicon octicon-link"></span></a>Voodoo\Paginator::getUri()</h4>
+
+<p>Return the URI of the request (the url in the address bar).
+It can be used to automatically set the url based on the request uri.</p>
+
+<p>In the example below, the __construct() accepts the pagePattern and  create the pagination url from the getUri();</p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator);
+
+$uri = $paginator-&gt;getUri();
+</code></pre>
+
+<hr><h4>
+<a name="voodoopaginatorgetpage" class="anchor" href="#voodoopaginatorgetpage"><span class="octicon octicon-link"></span></a>Voodoo\Paginator::getPage()</h4>
+
+<p>Get the current page number</p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com/pop/page/4";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage)
+                -&gt;setPrevNextTitle("Prev",  "Next")
+                -&gt;setFirstLastTitle("First", "Last");
+
+ echo $paginator-&gt;getPage(); // -&gt; 4
+</code></pre>
+
+<hr><h4>
+<a name="voodoopaginatorcount" class="anchor" href="#voodoopaginatorcount"><span class="octicon octicon-link"></span></a>Voodoo\Paginator::count()</h4>
+
+<p>Get the total pages </p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com/pop/page/4";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage)
+                -&gt;setPrevNextTitle("Prev",  "Next")
+                -&gt;setFirstLastTitle("First", "Last");
+
+ echo $paginator-&gt;count(); // 15
+</code></pre>
+
+<hr><h4>
+<a name="voodoopaginatorgetperpage" class="anchor" href="#voodoopaginatorgetperpage"><span class="octicon octicon-link"></span></a>Voodoo\Paginator::getPerPage()</h4>
+
+<p>Get total items per page</p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com/pop/page/4";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage)
+                -&gt;setPrevNextTitle("Prev",  "Next")
+                -&gt;setFirstLastTitle("First", "Last");
+
+ echo $paginator-&gt;getPerPage(); // 10
+</code></pre>
+
+<hr><h4>
+<a name="voodoopaginatorgetstart" class="anchor" href="#voodoopaginatorgetstart"><span class="octicon octicon-link"></span></a>Voodoo\Paginator::getStart()</h4>
+
+<p>Get the start of the count for the pagination set</p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com/pop/page/4";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage)
+                -&gt;setPrevNextTitle("Prev",  "Next")
+                -&gt;setFirstLastTitle("First", "Last");
+
+ echo $paginator-&gt;getStart(); // 30
+</code></pre>
+
+<hr><h4>
+<a name="voodoopaginatorgetend" class="anchor" href="#voodoopaginatorgetend"><span class="octicon octicon-link"></span></a>Voodoo\Paginator::getEnd()</h4>
+
+<p>Get the end of the count for the pagination set</p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com/pop/page/4";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage)
+                -&gt;setPrevNextTitle("Prev",  "Next")
+                -&gt;setFirstLastTitle("First", "Last");
+
+ echo $paginator-&gt;getEnd(); // 39
+</code></pre>
+
+<hr><h4>
+<a name="voodoopaginatorgetpageurl" class="anchor" href="#voodoopaginatorgetpageurl"><span class="octicon octicon-link"></span></a>Voodoo\Paginator::getPageUrl()</h4>
+
+<p>Return the page url based on the url provided </p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com/pop/page/4";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage)
+                -&gt;setPrevNextTitle("Prev",  "Next")
+                -&gt;setFirstLastTitle("First", "Last");
+
+ echo $paginator-&gt;getPageUrl(); // http://mysite.com/pop/page/4
+</code></pre>
+
+<p>Also it can be used to get the url of any other pages</p>
+
+<pre><code>$page6 = $paginator-&gt;getPageUrl(6); // http://mysite.com/pop/page/6
+</code></pre>
+
+<hr><h4>
+<a name="voodoopaginatorgetnextpageurl" class="anchor" href="#voodoopaginatorgetnextpageurl"><span class="octicon octicon-link"></span></a>Voodoo\Paginator::getNextPageUrl()</h4>
+
+<p>Return the next page url</p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com/pop/page/4";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage)
+                -&gt;setPrevNextTitle("Prev",  "Next")
+                -&gt;setFirstLastTitle("First", "Last");
+
+ echo $paginator-&gt;getNextPageUrl(); // http://mysite.com/pop/page/5
+</code></pre>
+
+<hr><h4>
+<a name="voodoopaginatorgetprevpageurl" class="anchor" href="#voodoopaginatorgetprevpageurl"><span class="octicon octicon-link"></span></a>Voodoo\Paginator::getPrevPageUrl()</h4>
+
+<p>Return the previous page url</p>
+
+<pre><code>&lt;?php
+
+include "src/Voodoo/Paginator.php";
+
+$url = "http://mysite.com/pop/page/4";
+$pagePattern = "/page/(:num)";
+$totalItems = 150;
+$totalPerPage = 10;
+
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage)
+                -&gt;setPrevNextTitle("Prev",  "Next")
+                -&gt;setFirstLastTitle("First", "Last");
+
+ echo $paginator-&gt;getPrevPageUrl(); // http://mysite.com/pop/page/3
+</code></pre>
+
+<hr><h3>
+<a name="using-paginator-with-sql-query" class="anchor" href="#using-paginator-with-sql-query"><span class="octicon octicon-link"></span></a>Using Paginator with SQL Query</h3>
+
+<pre><code>&lt;?php
+/**
+ * Using Paginator with SQL query
+ * 
+ * We will execute two queries, one to count all entries, 
+ * the second one to get all the data with LIMIT and OFFSET
+ */
+
+include(dirname(__DIR__)."/src/Voodoo/Paginator.php");
+
+$pdo = new PDO ("mysql:host=$hostname;dbname=$dbname", "$username", "$pw");
+$tableName = "myTable";
+
+/**
+ * To count all the entries based on the criteria provided
+ */
+$sth = $pdo-&gt;query("SELECT COUNT(id) AS count FROM {$tableName}");
+$countResult = $sth-&gt;fetch(PDO::FETCH_ASSOC);
+
+$totalItems = $countResult["count"];
+$totalPerPage = 10;
+
+/**
+ * Paginator will allow us to get the LIMIT and OFFSET for the query
+ */
+$url = "http://mysite.com/pop/page/4";
+$pagePattern = "/page/(:num)";
+$paginator = (new Voodoo\Paginator)
+                -&gt;setUrl($url, $pagePattern)
+                -&gt;setItems($totalItems, $totalPerPage);
+
+$limit = $paginator-&gt;getPerPage();
+$offset = $paginator-&gt;getStart();
+$results = $pdo-&gt;query("SELECT * FROM {$tableName} LIMIT {$limit} OFFSET {$offset}");
+
+?&gt;
+
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;link rel="stylesheet" href="./assets/paginator.css"&gt;
+        &lt;title&gt;Paginator SQL Example&lt;/title&gt;
+    &lt;/head&gt;
+
+    &lt;body&gt;
+        &lt;?= $paginator; ?&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>Please refer to the example directory for examples</p>
+
+<hr><p>(c) This Year Mardix :)</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/mardix/Paginator/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/mardix/Paginator/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/mardix/Paginator"></a> is maintained by <a href="https://github.com/mardix">mardix</a>.</p>
+
+          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
