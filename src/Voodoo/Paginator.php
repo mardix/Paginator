@@ -48,7 +48,7 @@ class Paginator implements IteratorAggregate
     
     public function __construct($pagePattern = "") 
     {
-        //$this->setUrl($this->getUri(), $pagePattern);
+        $this->setUrl($this->getUri(), $pagePattern);
     }
     
     public function setUrl($url, $pagePattern = null) 
@@ -338,9 +338,9 @@ class Paginator implements IteratorAggregate
             $prev = $this->page - 1;
             if ($this->page >= $this->navigationSize && $showPrevNextNav) {
                 // First
-                $navigation[] = $this->buildPaginationModel(1, $this->firstTitle, false, true, false); 
+                $navigation[] = $this->buildPaginationModel(1, $this->firstTitle, false, "first"); 
                 // Prev
-                $navigation[] = $this->buildPaginationModel($prev, $this->prevTitle);
+                $navigation[] = $this->buildPaginationModel($prev, $this->prevTitle, false, "prev");
             }                          
 
             for ($i = $start; $i <= $end; $i++){
@@ -350,11 +350,11 @@ class Paginator implements IteratorAggregate
 
             $next = $this->page + 1;                          
             if ($next < $this->totalPages && $end < $this->totalPages && $showPrevNextNav ) {
-                $navigation[] = $this->buildPaginationModel($next, $this->nextTitle); 
+                $navigation[] = $this->buildPaginationModel($next, $this->nextTitle, false, "next"); 
             }
             
             if($this->totalPages > $this->navigationSize) {
-                $navigation[] = $this->buildPaginationModel($this->totalPages, $this->lastTitle, false, false, true); 
+                $navigation[] = $this->buildPaginationModel($this->totalPages, $this->lastTitle, false, "last"); 
             }
             
             
@@ -368,19 +368,17 @@ class Paginator implements IteratorAggregate
      * @param int $pageNumber
      * @param string $label
      * @param bool $isCurrent
-     * @param bool $isNavFirst
-     * @param bool $isNavLast
+     * @param string $isLabel (first | prev | next | last)
      * @return Array
      */
-    private function buildPaginationModel($pageNumber, $label, $isCurrent = false, $isNavFirst = false, $isNavLast = false)
+    private function buildPaginationModel($pageNumber, $label, $isCurrent = false, $isLabel = "page")
     {
         return [
-                    "pageNumber" => $pageNumber,
+                    "page_number" => $pageNumber,
                     "label" => $label,
                     "url" => $this->parseTplUrl($pageNumber),
-                    "isCurrent" => $isCurrent,
-                    "isNavigationFirst" => $isNavFirst, 
-                    "isNavigationLast" => $isNavLast                     
+                    "is_current" => $isCurrent,
+                    "is_{$isLabel}" => true // first, prev, next, last                   
                 ];
     }
     
@@ -406,7 +404,7 @@ class Paginator implements IteratorAggregate
         $list = "";
         foreach ($this->toArray() as $page) {
             $href = "<a href=\"{$page["url"]}\">{$page["label"]}</a>";
-            $tagClass = ($page["isCurrent"]) ? " class=\"active\" " : "";
+            $tagClass = ($page["is_current"]) ? " class=\"active\" " : "";
             $list .= "<{$listTag}{$tagClass}>{$href}</{$listTag}>".PHP_EOL; 
         }
         return 

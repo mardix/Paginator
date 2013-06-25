@@ -89,14 +89,42 @@ class PaginatorTest extends \PHPUnit_Framework_TestCase {
     {
        $this->paginator1->setItems(100, 10); 
        $data = $this->paginator1->toArray()[3];
-       $this->assertEquals(4, $data["pageNumber"]);
+       $this->assertEquals(4, $data["page_number"]);
     }
     
     public function testToArrayIsCurrent()
     {
        $this->paginator1->setItems(100, 10)->setPage(7); 
        $data = $this->paginator1->toArray()[6];
-       $this->assertTrue($data["isCurrent"]);
+       $this->assertTrue($data["is_current"]);
     }   
-       
+    
+    public function testToArrayIsFirst()
+    {
+       $this->paginator1->setItems(150, 10)->setPage(11); 
+       $data = $this->paginator1->toArray()[0];
+       $this->assertTrue($data["is_first"]);
+    }   
+    
+    public function testToArrayIsPrev()
+    {
+       $this->paginator1->setItems(150, 10)->setPage(11); 
+       $data = $this->paginator1->toArray()[1];
+       $this->assertTrue($data["is_prev"]);
+    }
+    
+    public function testToArrayIsNext()
+    {
+       $this->paginator1->setItems(150, 10)->setPage(7); 
+       $data = $this->paginator1->toArray()[10];
+       $this->assertTrue($data["is_next"]);
+    }   
+    
+    public function testToArrayIsLast()
+    {
+       $this->paginator1->setItems(150, 10)->setPage(7); 
+       $data = $this->paginator1->toArray()[11];
+       $this->assertTrue($data["is_last"]);
+    }
+    
 }
