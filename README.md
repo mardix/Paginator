@@ -17,12 +17,32 @@ Requirements: PHP >= 5.4
 ---
 
 
-### About Paginator
+## About Paginator
 
 Paginator is a simple class that allows you to create pagination for your application. 
 It doesn't require any database connection. It only requires the total of items found 
 and from there it will create a pagination that can be export to HTML or Array. 
 It is also compatible with Twitter's Bootstrap Framework.
+
+---
+
+## Install Paginator
+
+You can just download Paginator as is, or with Composer. 
+
+To install with composer, add the following in the require key in your **composer.json** file
+
+	"voodoophp/paginat": "2.*"
+
+composer.json
+
+	{
+	    "name": "voodoophp/myapp",
+	    "description": "My awesome Voodoo App",
+	    "require": {
+	        "voodoophp/paginator": "2.*"
+	    }
+	}
 
 
 ---
@@ -40,20 +60,6 @@ or
 	
 Paginator will automatically match the page number with the url above, and create pagination for the rest of the pages based on the total items and items per page provided.
 
-	<?php
-	
-	include "./src/Voodoo/Paginator.php";
-	
-	$url = "http://mysite.com";
-	$pagePattern = "/page/(:num)";
-	$totalItems = 150;
-	$totalPerPage = 10;
-	
-	$paginator = (new Voodoo\Paginator)
-	                ->setUrl($url, $pagePattern)
-	                ->setItems($totalItems, $totalPerPage);
-	?>
- 
 
 ### Catching the page number
  
@@ -79,31 +85,36 @@ Page number pattern is set in
 	
 On both examples it will catch the page number [**25**] and create from there the start and the end of the pagination.
 
-Any variation of the pagination is OK, as long as it includes **(:num)** 
+Any variation of the page number pattern is OK, as long as it includes **(:num)** 
 
 
----
 
-### Example
+### A Simple Example
 
 
 	<?php
 	
 	include "src/Voodoo/Paginator.php";
+
+	// Pretending the the request url is: 
+	// http://mysite.com.com/hip-hop/page/5
 	
-	$url = "http://mysite.com";
-	$pagePattern = "/page/(:num)";
-	$totalItems = 150;
-	$totalPerPage = 10;
+	// to catch the page number pattern in the request url
+	$pagePattern = "/page/(:num)"; 
+
+	// Some pre-calculated number
+	$totalItems = 150; 
+
+	// Total items to show per page
+	$totalPerPage = 10; 
 	
-	$paginator = (new Voodoo\Paginator)
-	                ->setUrl($url, $pagePattern)
+	$paginator = (new Voodoo\Paginator($pagePattern))
 	                ->setItems($totalItems, $totalPerPage);
 	?>
 	
 	<html>
 	    <head>
-	        <link rel="stylesheet" href="./examples/paginator.css">
+	        <link rel="stylesheet" href="./assets/paginator.css">
 	        <title>Paginator Example</title>
 	    </head>
 	    
@@ -118,16 +129,15 @@ Will  render something like this:
 	
 With links that look like: 
 
-	<a href='http://mysite.com/page/6'>6</a>
+	<a href='http://mysite.com/hip-hop/page/6'>6</a>
 
 
 ---
-### To get data and render 
+### Methods 
+
+---
 
 
-
-
-### Setters
 
 ####Voodoo\Paginator::__construct()
 	<?php
@@ -137,7 +147,7 @@ With links that look like:
 	$paginator = new Voodoo\Paginator;
 	
 
-
+---
 ####Voodoo\Paginator::setUrl()
 To set the url and the  page number pattern
 
@@ -152,7 +162,7 @@ To set the url and the  page number pattern
 	                ->setUrl($url, $pagePattern);
 
 
-######Alternative with the URL being set automatically
+##### Alternative with the URL being set automatically
 
 Paginator will set the URL automatically based on the request URI if setUrl() is not called. All the paginations will be based on the current url. 
 
@@ -166,9 +176,10 @@ In the example below, the __construct() accepts the pagePattern and  create the 
 
 	$paginator = (new Voodoo\Paginator($pagePattern));
 	
+---
 	                
 ####Voodoo\Paginator::setItems()
-To set the items, total items per page
+To set the items, total items per page, and the pagination navigation size
 
 	<?php
 	
@@ -183,6 +194,8 @@ To set the items, total items per page
 	                ->setUrl($url, $pagePattern)
 	                ->setItems($totalItems, $totalPerPage);
 	 
+---
+
 ####Voodoo\Paginator::setPage()
 
 By default, Paginator will catch the page number from the URL, but if you want to set the current page manually, setPage let you do so
@@ -201,7 +214,7 @@ By default, Paginator will catch the page number from the URL, but if you want t
 	                ->setItems($totalItems, $totalPerPage)
 	                ->setPage(4);
 	                
-	
+---	
 
 ####Voodoo\Paginator::setPrevNextTitle()
 
@@ -223,6 +236,7 @@ By default it is set to **Prev** and **Next**
 	                ->setPage(4)
 	                ->setPrevNextTitle("Prev",	"Next");
 	 
+---
 
 ####Voodoo\Paginator::setFirstLastTitle()
 
@@ -245,10 +259,11 @@ By default it is set to **First** and **Last**
 	                ->setPrevNextTitle("Prev",	"Next")
 	                ->setFirstLastTitle("First", "Last");
 	                
+---
 	                
 ####Array Voodoo\Paginator::toArray()
 
-Will return the pagination data as an array with the following params:
+Will return the pagination data as an array which be used to create the pagination.
 
 	<?php
 	
@@ -268,7 +283,65 @@ Will return the pagination data as an array with the following params:
 	                
 	 $pagination = $paginator->toArray();
 
+
+toArray() will return an array similar to this:
+
+
+	[
+		[
+			"page_number" => 1,
+			"label" => "First",
+			"url" => "http://mysite.com/pop/page/1",
+			"is_current" => false,
+			"is_first" => true,                
+		],
+		[
+			"page_number" => 1,
+			"label" => "Prev",
+			"url" => "http://mysite.com/pop/page/1",
+			"is_current" => false,
+			"is_prev" => true,                   
+		],	
+		[
+			"page_number" => 1,
+			"label" => 1,
+			"url" => "http://mysite.com/pop/page/1",
+			"is_current" => true                   
+		],
+		[
+			"page_number" => 2,
+			"label" => 2,
+			"url" => "http://mysite.com/pop/page/2",
+			"is_current" => false                   
+		],
+		...
+		[
+			"page_number" => "10",
+			"label" => "Next",
+			"url" => "http://mysite.com/pop/page/10",
+			"is_current" => false,
+			"is_next" => true,                     
+		],	
+		[
+			"page_number" => 15,
+			"label" => "Last",
+			"url" => "http://mysite.com/pop/page/15",
+			"is_current" => false,
+			"is_last" => true,                  
+		]	
+	]
 	
+### Manually create the pagination with toArray()
+
+	<ul>
+		<?php foreach($paginator->toArray() as $page) : ?>
+			<li class='<?= ($page["is_current"]) ? "active" : ""; ?>'>
+				<a href='<?= $page["url"]; ?>'><?= $page["label"]; ?></a>
+			</li>
+		<?php endforeach; ?>
+	</ul>
+
+---
 
 ####String Voodoo\Paginator::toHtml()
 
@@ -316,11 +389,10 @@ Same as toHtml(), except it's when someone is echoing the paginator object
 	                ->setFirstLastTitle("First", "Last");
 	                
 	 echo $paginator;
-	 
-	 
-### Getters
 
-Using the settings above
+
+---	
+### Getters
 
 ####Voodoo\Paginator::getUri()
 
@@ -341,6 +413,7 @@ In the example below, the __construct() accepts the pagePattern and  create the 
 	
 	$uri = $paginator->getUri();
 
+---
 
 ####Voodoo\Paginator::getPage()
 
@@ -350,7 +423,7 @@ Get the current page number
 	
 	include "src/Voodoo/Paginator.php";
 	
-	$url = "http://mysite.com";
+	$url = "http://mysite.com/pop/page/4";
 	$pagePattern = "/page/(:num)";
 	$totalItems = 150;
 	$totalPerPage = 10;
@@ -358,11 +431,12 @@ Get the current page number
 	$paginator = (new Voodoo\Paginator)
 	                ->setUrl($url, $pagePattern)
 	                ->setItems($totalItems, $totalPerPage)
-	                ->setPage(4)
 	                ->setPrevNextTitle("Prev",	"Next")
 	                ->setFirstLastTitle("First", "Last");
 	                
 	 echo $paginator->getPage(); // -> 4
+
+---
 
 ####Voodoo\Paginator::count()
 
@@ -372,7 +446,7 @@ Get the total pages
 	
 	include "src/Voodoo/Paginator.php";
 	
-	$url = "http://mysite.com";
+	$url = "http://mysite.com/pop/page/4";
 	$pagePattern = "/page/(:num)";
 	$totalItems = 150;
 	$totalPerPage = 10;
@@ -380,11 +454,12 @@ Get the total pages
 	$paginator = (new Voodoo\Paginator)
 	                ->setUrl($url, $pagePattern)
 	                ->setItems($totalItems, $totalPerPage)
-	                ->setPage(4)
 	                ->setPrevNextTitle("Prev",	"Next")
 	                ->setFirstLastTitle("First", "Last");
 	                
 	 echo $paginator->count(); // 15
+
+---
 
 ####Voodoo\Paginator::getPerPage()
 
@@ -394,7 +469,7 @@ Get total items per page
 	
 	include "src/Voodoo/Paginator.php";
 	
-	$url = "http://mysite.com";
+	$url = "http://mysite.com/pop/page/4";
 	$pagePattern = "/page/(:num)";
 	$totalItems = 150;
 	$totalPerPage = 10;
@@ -402,11 +477,12 @@ Get total items per page
 	$paginator = (new Voodoo\Paginator)
 	                ->setUrl($url, $pagePattern)
 	                ->setItems($totalItems, $totalPerPage)
-	                ->setPage(4)
 	                ->setPrevNextTitle("Prev",	"Next")
 	                ->setFirstLastTitle("First", "Last");
 	                
-	 echo $paginator->perPage(); // 10
+	 echo $paginator->getPerPage(); // 10
+
+---
 
 ####Voodoo\Paginator::getStart()
 
@@ -416,7 +492,7 @@ Get the start of the count for the pagination set
 	
 	include "src/Voodoo/Paginator.php";
 	
-	$url = "http://mysite.com";
+	$url = "http://mysite.com/pop/page/4";
 	$pagePattern = "/page/(:num)";
 	$totalItems = 150;
 	$totalPerPage = 10;
@@ -424,11 +500,12 @@ Get the start of the count for the pagination set
 	$paginator = (new Voodoo\Paginator)
 	                ->setUrl($url, $pagePattern)
 	                ->setItems($totalItems, $totalPerPage)
-	                ->setPage(4)
 	                ->setPrevNextTitle("Prev",	"Next")
 	                ->setFirstLastTitle("First", "Last");
 	                
 	 echo $paginator->getStart(); // 30
+
+---
 
 ####Voodoo\Paginator::getEnd()
 
@@ -438,7 +515,7 @@ Get the end of the count for the pagination set
 	
 	include "src/Voodoo/Paginator.php";
 	
-	$url = "http://mysite.com";
+	$url = "http://mysite.com/pop/page/4";
 	$pagePattern = "/page/(:num)";
 	$totalItems = 150;
 	$totalPerPage = 10;
@@ -446,11 +523,12 @@ Get the end of the count for the pagination set
 	$paginator = (new Voodoo\Paginator)
 	                ->setUrl($url, $pagePattern)
 	                ->setItems($totalItems, $totalPerPage)
-	                ->setPage(4)
 	                ->setPrevNextTitle("Prev",	"Next")
 	                ->setFirstLastTitle("First", "Last");
 	                
 	 echo $paginator->getEnd(); // 39
+
+---
 
 ####Voodoo\Paginator::getPageUrl()
 
@@ -460,7 +538,7 @@ Return the page url based on the url provided
 	
 	include "src/Voodoo/Paginator.php";
 	
-	$url = "http://mysite.com";
+	$url = "http://mysite.com/pop/page/4";
 	$pagePattern = "/page/(:num)";
 	$totalItems = 150;
 	$totalPerPage = 10;
@@ -468,16 +546,16 @@ Return the page url based on the url provided
 	$paginator = (new Voodoo\Paginator)
 	                ->setUrl($url, $pagePattern)
 	                ->setItems($totalItems, $totalPerPage)
-	                ->setPage(4)
 	                ->setPrevNextTitle("Prev",	"Next")
 	                ->setFirstLastTitle("First", "Last");
 	                
-	 echo $paginator->getPageUrl(); // http://mysite.com/page/4
+	 echo $paginator->getPageUrl(); // http://mysite.com/pop/page/4
 	 
 Also it can be used to get the url of any other pages
 
-	$page6 = $paginator->getPageUrl(6); // http://mysite.com/page/6
+	$page6 = $paginator->getPageUrl(6); // http://mysite.com/pop/page/6
 	
+---
 
 ####Voodoo\Paginator::getNextPageUrl()
 
@@ -487,7 +565,7 @@ Return the next page url
 	
 	include "src/Voodoo/Paginator.php";
 	
-	$url = "http://mysite.com";
+	$url = "http://mysite.com/pop/page/4";
 	$pagePattern = "/page/(:num)";
 	$totalItems = 150;
 	$totalPerPage = 10;
@@ -495,13 +573,14 @@ Return the next page url
 	$paginator = (new Voodoo\Paginator)
 	                ->setUrl($url, $pagePattern)
 	                ->setItems($totalItems, $totalPerPage)
-	                ->setPage(4)
 	                ->setPrevNextTitle("Prev",	"Next")
 	                ->setFirstLastTitle("First", "Last");
 	                
-	 echo $paginator->getPageUrl(); // http://mysite.com/page/5
+	 echo $paginator->getNextPageUrl(); // http://mysite.com/pop/page/5
 
-####Voodoo\Paginator::getPrevUrl()
+---
+
+####Voodoo\Paginator::getPrevPageUrl()
 
 Return the previous page url
 
@@ -509,7 +588,7 @@ Return the previous page url
 	
 	include "src/Voodoo/Paginator.php";
 	
-	$url = "http://mysite.com";
+	$url = "http://mysite.com/pop/page/4";
 	$pagePattern = "/page/(:num)";
 	$totalItems = 150;
 	$totalPerPage = 10;
@@ -517,29 +596,41 @@ Return the previous page url
 	$paginator = (new Voodoo\Paginator)
 	                ->setUrl($url, $pagePattern)
 	                ->setItems($totalItems, $totalPerPage)
-	                ->setPage(4)
 	                ->setPrevNextTitle("Prev",	"Next")
 	                ->setFirstLastTitle("First", "Last");
 	                
-	 echo $paginator->getPageUrl(); // http://mysite.com/page/3
+	 echo $paginator->getPrevPageUrl(); // http://mysite.com/pop/page/3
 
 ---
 
-## Using with SQL
+### Using Paginator with SQL Query
 
 	<?php
 	/**
-	 * A simple example
+	 * Using Paginator with SQL query
+	 * 
+	 * We will execute two queries, one to count all entries, 
+	 * the second one to get all the data with LIMIT and OFFSET
 	 */
+	
 	include(dirname(__DIR__)."/src/Voodoo/Paginator.php");
 	
+	$pdo = new PDO ("mysql:host=$hostname;dbname=$dbname", "$username", "$pw");
 	$tableName = "myTable";
-	$queryCount = "SELECT COUNT(id) AS count FROM {$tableName}";
 	
-	$totalItems = $result["count"];
+	/**
+	 * To count all the entries based on the criteria provided
+	 */
+	$sth = $pdo->query("SELECT COUNT(id) AS count FROM {$tableName}");
+	$countResult = $sth->fetch(PDO::FETCH_ASSOC);
+	
+	$totalItems = $countResult["count"];
 	$totalPerPage = 10;
 	
-	$url = "http://mysite.com";
+	/**
+	 * Paginator will allow us to get the LIMIT and OFFSET for the query
+	 */
+	$url = "http://mysite.com/pop/page/4";
 	$pagePattern = "/page/(:num)";
 	$paginator = (new Voodoo\Paginator)
 	                ->setUrl($url, $pagePattern)
@@ -547,21 +638,18 @@ Return the previous page url
 	
 	$limit = $paginator->getPerPage();
 	$offset = $paginator->getStart();
-	$query = "SELECT * FROM {$tableName} LIMIT {$limit} OFFSET {$offset}";
+	$results = $pdo->query("SELECT * FROM {$tableName} LIMIT {$limit} OFFSET {$offset}");
+	
 	?>
 	
 	<html>
 	    <head>
-	        <link rel="stylesheet" href="./paginator.css">
-	        <title>Mardix's Paginator Example</title>
+	        <link rel="stylesheet" href="./assets/paginator.css">
+	        <title>Paginator SQL Example</title>
 	    </head>
-	    
+	
 	    <body>
-	        <h2>Paginator Example</h2>
-	        <?php
-	           echo $paginator;
-	        ?>
-	        
+	        <?= $paginator; ?>
 	    </body>
 	</html>
 
@@ -569,8 +657,8 @@ Return the previous page url
 
 Please refer to the example directory for examples
 
+---
 
-
- [@mardix](http://twitter.com/mardix)
+(c) This Year Mardix :)
 
 
