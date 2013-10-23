@@ -409,7 +409,7 @@ class Paginator implements IteratorAggregate
         }
         return 
             "
-                <{$wrapTag} class=\"{paginationClsName\">{$list}</{$wrapTag}>
+                <{$wrapTag} class=\"{paginationClsName}\">{$list}</{$wrapTag}>
             ";    
     } 
     
