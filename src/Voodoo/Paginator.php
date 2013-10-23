@@ -408,9 +408,9 @@ class Paginator implements IteratorAggregate
             $list .= "<{$listTag}{$tagClass}>{$href}</{$listTag}>".PHP_EOL; 
         }
         return 
-            "<div class=\"{$paginationClsName}\">
-                <{$wrapTag}>{$list}</{$wrapTag}>
-            </div>";    
+            "
+                <{$wrapTag} class=\"{$paginationClsName}\">{$list}</{$wrapTag}>
+            ";    
     } 
     
     
