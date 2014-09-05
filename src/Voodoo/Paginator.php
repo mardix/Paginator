@@ -390,13 +390,11 @@ class Paginator implements IteratorAggregate
      * @param string $listTag
      * @return string
      * <code>
-     * <div class='pagination'>
-     *      <ul>
-     *          <li>1</li>
-     *          <li class='active'>2</li>
-     *          <li>3</li>
-     *      <ul>
-     * </div>
+     * <ul class='pagination'>
+     *     <li>1</li>
+     *     <li class='active'>2</li>
+     *     <li>3</li>
+     * <ul>
      * </code>
      */
     public function toHtml($paginationClsName="pagination", $wrapTag = "ul", $listTag = "li")
@@ -408,9 +406,7 @@ class Paginator implements IteratorAggregate
             $list .= "<{$listTag}{$tagClass}>{$href}</{$listTag}>".PHP_EOL; 
         }
         return 
-            "<div class=\"{$paginationClsName}\">
-                <{$wrapTag}>{$list}</{$wrapTag}>
-            </div>";    
+            "<{$wrapTag} class=\"{$paginationClsName}\">{$list}</{$wrapTag}>";    
     } 
     
     
