@@ -27,7 +27,7 @@ use IteratorAggregate;
 
 class Paginator implements IteratorAggregate
 {
-    CONST VERSION = "2.0.*";
+    CONST VERSION = "2.1.*";
     
     CONST NUM = "(:num)";
     
